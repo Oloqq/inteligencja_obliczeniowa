@@ -22,6 +22,7 @@ class TicTacDuh(TicTacToe):
 
 if __name__ == "__main__":
     # Start a match (and store the history of moves when it ends)
-    ai = Negamax(13)  # The AI will think 13 moves in advance
-    game = TicTacToe([Human_Player(), AI_Player(ai)])
+    player1 = AI_Player(Negamax(13))
+    player2 = AI_Player(Negamax(13))
+    game = TicTacToe([player1, player2])
     history = game.play()
