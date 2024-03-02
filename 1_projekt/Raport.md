@@ -109,8 +109,35 @@ prune_time = False
 ## Wyniki wersji nierekurencyjnej bez pruningu:
 ```
 depth 3
-{'deterministic': {'wins': 0, 'losses': 10, 'time': 0.0040290214682138096, 'moves': 186}, 'probabilistic': {'wins': 9, 'losses': 1, 'time': 0.004902796867566231, 'moves': 195}}
+{
+    "deterministic": {
+        "wins": 0,
+        "losses": 100,
+        "time": 0.0033423580475349197,
+        "moves": 1847
+    },
+    "probabilistic": {
+        "wins": 69,
+        "losses": 31,
+        "time": 0.0038709631491428316,
+        "moves": 1852
+    }
+}
 
 depth 5
-{'deterministic': {'wins': 10, 'losses': 0, 'time': 0.3385241223919776, 'moves': 186}, 'probabilistic': {'wins': 1, 'losses': 9, 'time': 0.4241072789216653, 'moves': 195}}
+{
+    "deterministic": {
+        "wins": 100,
+        "losses": 0,
+        "time": 0.25229950459763756,
+        "moves": 1847
+    },
+    "probabilistic": {
+        "wins": 31,
+        "losses": 69,
+        "time": 0.3141499229950215,
+        "moves": 1852
+    }
+}
 ```
+Czas obliczania pojedynczego ruchu zwiększył o rząd wielkości dla głębokości 3, i 3 rzędy wielkości dla głębokości 5.
