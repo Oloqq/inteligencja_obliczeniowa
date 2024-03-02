@@ -25,6 +25,92 @@ depth 5
 ```
 
 # Na 4.0
-TODO: Porównaj kilka (co najmniej Negamax z i bez odcięcia alfa-beta, z dwoma różnymi ustawienia maksymalnej głębokości) algorytmy dla gier deterministycznych na deterministycznych i probabilistycznych wariantach twojej gry.
+Algorytm Negamax uruchamiano na początku w wersji z rekurencją, następnie sprawdzono wersję non-recursive. Okazało się że wersja nierekursywna działa około 10 razy szybciej. `time` w wynikach oznacza średni czas na ruch.
 
-TODO: Napisz kod, który mierzy średni czas spędzony na wybieraniu akcji przez każdy wariant AI. Dodaj zmierzone czasy do raportu
+## Wyniki wersji rekurencyjnej, z pruningiem:
+```json
+depth 3
+{
+    "deterministic": {
+        "wins": 0,
+        "losses": 100,
+        "time": 0.0002854002846611871,
+        "moves": 1854
+    },
+    "probabilistic": {
+        "wins": 59,
+        "losses": 41,
+        "time": 0.006065457039713793,
+        "moves": 1783
+    }
+}
+
+depth 5
+{
+    "deterministic": {
+        "wins": 100,
+        "losses": 0,
+        "time": 0.0027831299019477128,
+        "moves": 1854
+    },
+    "probabilistic": {
+        "wins": 41,
+        "losses": 59,
+        "time": 0.062839291166604,
+        "moves": 1783
+    }
+}
+```
+
+## Wyniki wersji nierekurencyjnej:
+```json
+depth 3
+{
+    "deterministic": {
+        "wins": 0,
+        "losses": 100,
+        "time": 0.0005652362943146924,
+        "moves": 1849
+    },
+    "probabilistic": {
+        "wins": 61,
+        "losses": 39,
+        "time": 0.000653052490029559,
+        "moves": 1788
+    }
+}
+
+depth 5
+{
+    "deterministic": {
+        "wins": 100,
+        "losses": 0,
+        "time": 0.005321090965415414,
+        "moves": 1849
+    },
+    "probabilistic": {
+        "wins": 39,
+        "losses": 61,
+        "time": 0.006640563475205594,
+        "moves": 1788
+    }
+}
+```
+
+W celu wyłączenia pruningu zmodyfikowano plik modułu easyAI `easyAI\AI\NonRecursiveNegamax.py`, konkretnie podmieniono linię 142
+```
+prune_time = states[depth].alpha >= states[depth].beta
+```
+na
+```
+prune_time = False
+```
+
+## Wyniki wersji nierekurencyjnej bez pruningu:
+```
+depth 3
+{'deterministic': {'wins': 0, 'losses': 10, 'time': 0.0040290214682138096, 'moves': 186}, 'probabilistic': {'wins': 9, 'losses': 1, 'time': 0.004902796867566231, 'moves': 195}}
+
+depth 5
+{'deterministic': {'wins': 10, 'losses': 0, 'time': 0.3385241223919776, 'moves': 186}, 'probabilistic': {'wins': 1, 'losses': 9, 'time': 0.4241072789216653, 'moves': 195}}
+```
