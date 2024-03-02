@@ -1,6 +1,8 @@
-from easyAI import Negamax, AI_Player, TwoPlayerGame
+from copy import deepcopy
+from easyAI import Negamax, AI_Player, NonRecursiveNegamax, TwoPlayerGame
 from easyAI.games import Nim
 import random
+import time
 
 
 class Nimby(TwoPlayerGame):
@@ -27,8 +29,10 @@ class Nimby(TwoPlayerGame):
 
     """
 
-    def __init__(self, fail_prob, players=None, max_removals_per_turn=None, piles=(5, 5, 5, 5)):
-        """ Default for `piles` is 5 piles of 5 pieces. """
+    def __init__(
+        self, fail_prob, players=None, max_removals_per_turn=None, piles=(5, 5, 5, 5)
+    ):
+        """Default for `piles` is 5 piles of 5 pieces."""
         self.players = players
         self.piles = list(piles)
         self.max_removals_per_turn = max_removals_per_turn
@@ -41,9 +45,11 @@ class Nimby(TwoPlayerGame):
             for i in range(len(self.piles))
             for j in range(
                 1,
-                self.piles[i] + 1
-                if self.max_removals_per_turn is None
-                else min(self.piles[i] + 1, self.max_removals_per_turn),
+                (
+                    self.piles[i] + 1
+                    if self.max_removals_per_turn is None
+                    else min(self.piles[i] + 1, self.max_removals_per_turn)
+                ),
             )
         ]
 
@@ -73,7 +79,19 @@ class Nimby(TwoPlayerGame):
         return 100 if self.win() else 0
 
     def ttentry(self):
-        return tuple(self.piles)  # optional, speeds up AI
+        return deepcopy(self.piles)
+
+    def ttrestore(self, entry):
+        self.piles = deepcopy(entry)
+
+
+class NimRestorable(Nim):
+    def ttentry(self):
+        return deepcopy(self.piles)
+
+    def ttrestore(self, entry):
+        self.piles = deepcopy(entry)
+
 
 # 2.
 # Napisz kod, który uruchamia dwóch graczy AI z algorytmem Negamax
@@ -83,19 +101,22 @@ class Nimby(TwoPlayerGame):
 # dla gier na deterministycznym i probabilistycznym wariancie Twojej gry.
 
 
-class PlayerReport:
+class PlayerReport(AI_Player):
     def __init__(self, ai):
+        super().__init__(ai)
         self.ai = ai
         self.report = {
-            "deterministic": {
-                "wins": 0,
-                "losses": 0,
-            },
-            "probabilistic": {
-                "wins": 0,
-                "losses": 0,
-            }
+            "deterministic": {"wins": 0, "losses": 0, "time": 0, "moves": 0},
+            "probabilistic": {"wins": 0, "losses": 0, "time": 0, "moves": 0},
         }
+
+    def ask_move(self, game):
+        now = time.time()
+        move = self.AI_algo(game)
+        elapsed = time.time() - now
+        variant = "deterministic" if isinstance(game, Nim) else "probabilistic"
+        self.report[variant]["time"] += elapsed
+        return move
 
 
 def maybe_swap_players(p1, p2):
@@ -107,16 +128,19 @@ def maybe_swap_players(p1, p2):
 
 def play(game, reports, casename):
     game.verbose = False
-    game.play(verbose=False)
+
+    history = game.play(verbose=False)
     winner = reports[game.current_player - 1]
     loser = reports[game.opponent_index - 1]
     winner.report[casename]["wins"] += 1
     loser.report[casename]["losses"] += 1
+    winner.report[casename]["moves"] += len(history)
+    loser.report[casename]["moves"] += len(history)
 
 
 if __name__ == "__main__":
-    report1 = PlayerReport(AI_Player(Negamax(3)))
-    report2 = PlayerReport(AI_Player(Negamax(5)))
+    report1 = PlayerReport(NonRecursiveNegamax(3))
+    report2 = PlayerReport(NonRecursiveNegamax(5))
     samples = 100
 
     for i in range(samples):
@@ -124,10 +148,14 @@ if __name__ == "__main__":
 
         player1, player2 = maybe_swap_players(report1, report2)
         reports = [player1, player2]
-        ais = [p.ai for p in reports]
 
-        play(Nimby(0.1, ais), reports, "probabilistic")
-        play(Nim(ais), reports, "deterministic")
+        play(Nimby(0.1, reports), reports, "probabilistic")
+        play(NimRestorable(reports), reports, "deterministic")
+
+    report1.report["deterministic"]["time"] /= report1.report["deterministic"]["moves"]
+    report2.report["deterministic"]["time"] /= report2.report["deterministic"]["moves"]
+    report1.report["probabilistic"]["time"] /= report1.report["probabilistic"]["moves"]
+    report2.report["probabilistic"]["time"] /= report2.report["probabilistic"]["moves"]
 
     print("depth 3")
     print(report1.report)
