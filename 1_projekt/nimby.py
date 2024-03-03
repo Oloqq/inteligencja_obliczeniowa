@@ -93,14 +93,6 @@ class NimRestorable(Nim):
         self.piles = deepcopy(entry)
 
 
-# 2.
-# Napisz kod, który uruchamia dwóch graczy AI z algorytmem Negamax
-# przeciwko sobie wielokrotnie, zmieniając gracza rozpoczynającego.
-# Policz liczbę zwycięstw każdego z graczy.
-# Porównaj dwa różne ustawienia maksymalnej głębokości
-# dla gier na deterministycznym i probabilistycznym wariancie Twojej gry.
-
-
 class PlayerReport(AI_Player):
     def __init__(self, ai):
         super().__init__(ai)

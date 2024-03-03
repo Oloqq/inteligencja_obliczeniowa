@@ -25,7 +25,17 @@ depth 5
 ```
 
 # Na 4.0
-Algorytm Negamax uruchamiano na początku w wersji z rekurencją, następnie sprawdzono wersję non-recursive. Okazało się że wersja nierekursywna działa około 10 razy szybciej. `time` w wynikach oznacza średni czas na ruch.
+Deafultowa wersja algorytmu Negamax w module easyAI zawiera prunig, który pozwala na przyspieszenie obliczeń. Sprawdzono jak prunig wpływa na ich czas. Aby to zrobić, zmodyfikowano plik modułu easyAI `easyAI\AI\NonRecursiveNegamax.py`, konkretnie podmieniono linię 142
+```
+prune_time = states[depth].alpha >= states[depth].beta
+```
+na
+```
+prune_time = False
+```
+Użyto NonRecursiveNegamax (ze względu na prostotę modyfikacji) i zauważono, że wersja nierurkurencyjna z prunigiem działa około 10 razy szybciej niż wersja rekurencyjna z prunigiem.
+
+Aby obliczyć czas wykonania ruchu, zmodyfikowano klasę PlayerReport, która przechowuje wyniki gracza. Zmodyfikowano metodę ask_move, która zwraca ruch wybrany przez algorytm. Dodano pomiar czasu wykonania ruchu. 'time' w wynikach oznacza średni czas na ruch.
 
 ## Wyniki wersji rekurencyjnej, z pruningiem:
 ```json
@@ -97,17 +107,8 @@ depth 5
 }
 ```
 
-W celu wyłączenia pruningu zmodyfikowano plik modułu easyAI `easyAI\AI\NonRecursiveNegamax.py`, konkretnie podmieniono linię 142
-```
-prune_time = states[depth].alpha >= states[depth].beta
-```
-na
-```
-prune_time = False
-```
-
 ## Wyniki wersji nierekurencyjnej bez pruningu:
-```
+```json
 depth 3
 {
     "deterministic": {
@@ -140,4 +141,4 @@ depth 5
     }
 }
 ```
-Czas obliczania pojedynczego ruchu zwiększył o rząd wielkości dla głębokości 3, i 3 rzędy wielkości dla głębokości 5.
+Czas obliczania pojedynczego ruchu zwiększył o rząd wielkości dla głębokości 3, i 3 rzędy wielkości dla głębokości 5. Widać, że prunig znacząco przyspiesza obliczenia. 
