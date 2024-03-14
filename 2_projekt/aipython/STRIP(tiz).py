@@ -18,22 +18,38 @@ def clear(x):
     return 'clear_'+x
 
 
-def create_blocks_world(blocks={'a', 'b', 'c', 'd'}):
+def create_blocks_world(blocks):
     blocks_and_table = blocks | {'table'}
-    stmap = {Strips(move(x, y, z), {on(x): y, clear(x): True, clear(z): True},
-                    {on(x): z, clear(y): True, clear(z): False})
-             for x in blocks
-             for y in blocks_and_table
-             for z in blocks
-             if x != y and y != z and z != x}
-    stmap.update({Strips(move(x, y, 'table'), {on(x): y, clear(x): True},
-                         {on(x): 'table', clear(y): True})
-                  for x in blocks
-                  for y in blocks
-                  if x != y})
-    feature_domain_dict = {on(x): blocks_and_table-{x} for x in blocks}
-    feature_domain_dict.update({clear(x): boolean for x in blocks_and_table})
-    return STRIPS_domain(feature_domain_dict, stmap)
+    # putting blocks on top of one another
+    action_map = {
+        Strips(
+            move(x, y, z),                                # name
+            {on(x): y, clear(x): True, clear(z): True},   # preconditions
+            {on(x): z, clear(y): True, clear(z): False})  # effects
+                                                          # default cost is 1
+        for x in blocks
+        for y in blocks_and_table
+        for z in blocks
+        if x != y and y != z and z != x
+    }
+    # putting blocks onto the table
+    action_map.update({
+        Strips(move(x, y, 'table'),               # name
+               {on(x): y, clear(x): True},        # preconditions
+               {on(x): 'table', clear(y): True})  # effects
+        for x in blocks
+        for y in blocks
+        if x != y})
+
+    # all blocks that x can be on
+    feature_domain_dict = {
+        on(x): blocks_and_table-{x} for x in blocks
+    }
+    # clear is either False or True
+    feature_domain_dict.update({
+        clear(x): boolean for x in blocks_and_table
+    })
+    return STRIPS_domain(feature_domain_dict, action_map)
 
 
 blocks1dom = create_blocks_world({'a', 'b', 'c'})
@@ -64,4 +80,4 @@ blocks3 = Planning_problem(blocks2dom,
 # To find more than one plan:
 s1 = SearcherMPP(Forward_STRIPS(blocks2))  # A*
 s1.search()  # find another plan
-s1.search()  # find another plan
+# s1.search()  # find another plan
