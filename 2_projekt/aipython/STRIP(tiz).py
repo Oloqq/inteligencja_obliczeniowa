@@ -62,6 +62,6 @@ blocks3 = Planning_problem(blocks2dom,
 # SearcherMPP(Forward_STRIPS(stripsProblem.problem1)).search()  #A* with MPP
 # DF_branch_and_bound(Forward_STRIPS(stripsProblem.problem1),10).search() #B&B
 # To find more than one plan:
-s1 = SearcherMPP(Forward_STRIPS(stripsProblem.problem1))  # A*
+s1 = SearcherMPP(Forward_STRIPS(blocks2))  # A*
 s1.search()  # find another plan
 s1.search()  # find another plan
