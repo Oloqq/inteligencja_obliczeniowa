@@ -1,0 +1,11 @@
+{'a_is_on': 'table', 'clear_a': True, 'b_is_on': 'c', 'clear_b': True, 'c_is_on': 'table', 'clear_c': False}
+  B
+A C
+
+   --move_b_from_c_to_table--> {'a_is_on': 'table', 'clear_a': True, 'b_is_on': 'table', 'clear_b': True, 'c_is_on': 'table', 'clear_c': True}
+
+A C B
+   --move_a_from_table_to_b--> {'a_is_on': 'b', 'clear_a': True, 'b_is_on': 'table', 'clear_b': False, 'c_is_on': 'table', 'clear_c': True, 'clear_table': True}
+  A
+C B
+   --move_c_from_table_to_a--> {'a_is_on': 'b', 'clear_a': False, 'b_is_on': 'table', 'clear_b': False, 'c_is_on': 'a', 'clear_c': True, 'clear_table': True}

@@ -1,6 +1,7 @@
 from searchMPP import SearcherMPP
 from stripsProblem import *
 from stripsForwardPlanner import *
+import time
 
 
 def move(x, y, z):
@@ -52,25 +53,62 @@ def create_blocks_world(blocks):
     return STRIPS_domain(feature_domain_dict, action_map)
 
 
-blocks1dom = create_blocks_world({'a', 'b', 'c'})
-blocks1 = Planning_problem(blocks1dom,
-                           {on('a'): 'table', clear('a'): True,
-                            on('b'): 'c',  clear('b'): True,
-                               on('c'): 'table', clear('c'): False},  # initial state
-                           {on('a'): 'b', on('c'): 'a'})  # goal
+def blocks_1():
+    """
+           C
+      B -> A
+    A C    B
+    """
+    blocks1dom = create_blocks_world({'a', 'b', 'c'})
+    blocks1 = Planning_problem(blocks1dom,
+                               {on('a'): 'table', clear('a'): True,
+                                on('b'): 'c',  clear('b'): True,
+                                on('c'): 'table', clear('c'): False},  # initial state
+                               {on('a'): 'b', on('c'): 'a'})  # goal
+    return blocks1
 
-blocks2dom = create_blocks_world({'a', 'b', 'c', 'd'})
-tower4 = {clear('a'): True, on('a'): 'b',
-          clear('b'): False, on('b'): 'c',
-          clear('c'): False, on('c'): 'd',
-          clear('d'): False, on('d'): 'table'}
-blocks2 = Planning_problem(blocks2dom,
-                           tower4,  # initial state
-                           {on('d'): 'c', on('c'): 'b', on('b'): 'a'})  # goal
 
-blocks3 = Planning_problem(blocks2dom,
-                           tower4,  # initial state
-                           {on('d'): 'a', on('a'): 'b', on('b'): 'c'})  # goal
+def blocks_4_actions():
+    """
+      D
+      B -> A C
+    A C    B D
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): True,
+                                on('b'): 'c',  clear('b'): False,
+                                on('c'): 'table', clear('c'): False,
+                                on('d'): 'b', clear('d'): True,
+                                },  # initial state
+                               {on('a'): 'b', on('c'): 'd', on('b'): 'table', on('d'): 'table'})  # goal
+    return problem
+
+
+def main():
+    reps = 100
+
+    # problem = blocks_1()
+    problem = blocks_4_actions()
+
+    sum = 0
+
+    for _ in range(reps):
+        searcher = SearcherMPP(Forward_STRIPS(problem))  # A*
+        t1 = time.time_ns()
+        plan = searcher.search()
+        dt = time.time_ns() - t1
+        sum += dt
+
+    print(f"Average time (ns): {sum / reps}")
+
+    with open("result.txt", "w") as f:
+        f.write(str(plan))
+
+
+if __name__ == "__main__":
+    main()
+
 
 # from searchBranchAndBound import DF_branch_and_bound
 # import stripsProblem
@@ -78,6 +116,3 @@ blocks3 = Planning_problem(blocks2dom,
 # SearcherMPP(Forward_STRIPS(stripsProblem.problem1)).search()  #A* with MPP
 # DF_branch_and_bound(Forward_STRIPS(stripsProblem.problem1),10).search() #B&B
 # To find more than one plan:
-s1 = SearcherMPP(Forward_STRIPS(blocks2))  # A*
-s1.search()  # find another plan
-# s1.search()  # find another plan
