@@ -22,6 +22,7 @@ Wybrana dziedzina STRIPS dotyczy układania klocków na stole, co jest klasyczny
         E   D    C B
         B A C -> D E
         ```
+
 ## Rozwiązanie problemu metodą forward planning
 
 Rozwiązanie problemów polega na zastosowaniu metody forward planning, która systematycznie przeszukuje przestrzeń stanów od stanu początkowego do stanu końcowego, rozważając wszystkie możliwe akcje. Dla każdego z zdefiniowanych problemów algorytm forward planning jest użyty do znalezienia sekwencji ruchów, które transformują układ początkowy w układ końcowy. Oto rozwiązania dla każdego z problemów:
@@ -69,8 +70,151 @@ W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką (heu
 Otrzymane wyniki pokazują, że zastosowanie heurystyki pozwala znacząco zredukować czas potrzebny na znalezienie rozwiązania, nawet o kilka rzędów wielkości, co demonstruje skuteczność heurystyki w poprawie wydajności algorytmu planowania.
 
 # Na 4.0
-1. **Zdefiniowanie podceli dla problemów**
+## Zdefiniowanie podceli dla problemów
 
+Dla każdego z problemów zdefiniowano specyficzne etapy pośrednie, które przybliżały układ początkowy do układu końcowego. Oto zdefiniowane podcele dla każdego z problemów:
+1.  ```
+                C
+                E
+           D -> A ->   A -> A
+           B    D    C B    E C
+       E A C    B    E D    B D
+2.  ```
+        A    E
+        B    D
+        C -> C -> A   -> A
+        D    B    E C    E D
+        E    A    D B    C B
+3.   ```
+                 D
+                 C
+              -> B -> C   ->   A
+        E   D    A    D E    C B
+        B A C    E    B A    D E
+        ```
 
+## Rozwiązanie ponownie problemów z podcelami z heurystyką i bez
 
-2. **Rozwiązanie ponownie problemów z podcelami z heurystyką i bez**
+1. Problem 1
+   1. ```
+                C
+                E
+           D -> A
+           B    D
+       E A C    B
+       ```
+        - move_d_from_b_to_table
+        - move_b_from_c_to_table
+        - move_d_from_table_to_b
+        - move_a_from_table_to_d
+        - move_e_from_table_to_a
+        - move_c_from_table_to_e
+   2. ```
+       C
+       E
+       A ->   A
+       D    C B
+       B    E D
+       ```
+        - move_c_from_e_to_table
+        - move_e_from_a_to_table
+        - move_c_from_table_to_e
+        - move_a_from_d_to_c
+        - move_d_from_b_to_table
+        - move_b_from_table_to_d
+        - move_a_from_c_to_b
+   3. ```
+         A    A
+       C B -> E C
+       E D    B D
+       ```
+        - move_b_from_d_to_table
+        - move_a_from_c_to_table
+        - move_c_from_e_to_d
+        - move_a_from_table_to_e
+2. Problem 2
+   1. ```
+        A    E
+        B    D
+        C -> C
+        D    B
+        E    A
+        ```
+        - move_a_from_b_to_table
+        - move_b_from_c_to_a
+        - move_c_from_d_to_b
+        - move_d_from_e_to_c
+        - move_e_from_table_to_d
+   2. ```
+        E
+        D
+        C -> A
+        B    E C
+        A    D B
+        ```
+        - move_e_from_d_to_table
+        - move_d_from_c_to_table
+        - move_c_from_b_to_table
+        - move_b_from_a_to_table
+        - move_e_from_table_to_d
+        - move_a_from_table_to_e
+        - move_c_from_table_to_b
+   3. ```
+        A      A
+        E C -> E D
+        D B    C B
+        ```
+        - move_c_from_b_to_table
+        - move_a_from_e_to_b
+        - move_e_from_d_to_c
+        - move_a_from_b_to_e
+        - move_d_from_table_to_b
+3. Problem 3
+   1. ```
+                 D
+                 C
+              -> B
+        E   D    A
+        B A C    E
+        ```
+        - move_e_from_b_to_table
+        - move_d_from_c_to_table
+        - move_b_from_table_to_e
+        - move_c_from_table_to_d
+        - move_a_from_table_to_b
+   2. ```
+        D
+        C
+        B -> C
+        A    D E
+        E    B A
+        ```
+        - move_d_from_c_to_table
+        - move_c_from_b_to_table
+        - move_b_from_a_to_table
+        - move_d_from_table_to_b
+        - move_c_from_table_to_d
+        - move_a_from_e_to_table
+        - move_e_from_table_to_a
+   3. ```
+        C        A
+        D E -> C B
+        B A    D E
+        ```
+        - move_c_from_d_to_table
+        - move_d_from_b_to_table
+        - move_e_from_a_to_table
+        - move_b_from_table_to_e
+        - move_a_from_table_to_b
+        - move_c_from_table_to_d
+
+Tak jak poprzednio, porównano czasy działania algorytmu z heurystyką (heuristic) oraz bez niej (naive).
+```
+{'case_1_with_sub-goals_heuristic': 14951297.0,
+ 'case_1_with_sub-goals_naive':     976458129.0,
+ 'case_2_with_sub-goals_heuristic': 8175869.0,
+ 'case_2_with_sub-goals_naive':     790803520.0,
+ 'case_3_with_sub-goals_heuristic': 15927340.0,
+ 'case_3_with_sub-goals_naive':     1368617626.0}
+```
+Wyniki potwierdzają, że zastosowanie heurystyki pozwala znacząco zredukować czas potrzebny na znalezienie rozwiązania, nawet o kilka rzędów wielkości, co demonstruje skuteczność heurystyki w poprawie wydajności algorytmu planowania.

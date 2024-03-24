@@ -86,7 +86,6 @@ def problem_1():
                                {on('a'): 'e', on('c'): 'd', on('b'): 'table', on('d'): 'table', on('e'): 'b'})  # goal
     return problem
 
-
 """
 	     C
 	     E
@@ -170,12 +169,74 @@ def problem_2():
                                {on('a'): 'e', on('c'): 'table', on('b'): 'table', on('d'): 'b', on('e'): 'c'})  # goal
     return problem
 
+"""
+A    E
+B    D
+C -> C -> A   -> A
+D    B    E C    E D
+E    A    D B    C B
+"""
+
+def problem_2a():
+    """
+    A    E
+    B    D
+    C -> C
+    D    B
+    E    A
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'b', clear('a'): True,
+                                on('b'): 'c',  clear('b'): False,
+                                on('c'): 'd', clear('c'): False,
+                                on('d'): 'e', clear('d'): False,
+                                on('e'): 'table', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'table', on('c'): 'b', on('b'): 'a', on('d'): 'c', on('e'): 'd'})  # goal
+    return problem
+
+def problem_2b():
+    """
+    E
+    D
+    C -> A
+    B    E C
+    A    D B
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): False,
+                                on('b'): 'a',  clear('b'): False,
+                                on('c'): 'b', clear('c'): False,
+                                on('d'): 'c', clear('d'): False,
+                                on('e'): 'd', clear('e'): True,
+                                },  # initial state
+                               {on('a'): 'e', on('c'): 'b', on('b'): 'table', on('d'): 'table', on('e'): 'd'})  # goal
+    return problem
+
+def problem_2c():
+    """
+    A      A
+    E C -> E D
+    D B    C B
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'e', clear('a'): True,
+                                on('b'): 'table',  clear('b'): False,
+                                on('c'): 'b', clear('c'): True,
+                                on('d'): 'table', clear('d'): False,
+                                on('e'): 'd', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'e', on('c'): 'table', on('b'): 'table', on('d'): 'b', on('e'): 'c'})  # goal
+    return problem
 
 def problem_3():
     """
                A
-    E   D    C B
-    B A C -> D E
+    E   D -> C B
+    B A C    D E
     """
     domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
     problem = Planning_problem(domain,
@@ -184,6 +245,69 @@ def problem_3():
                                 on('c'): 'table', clear('c'): False,
                                 on('d'): 'c', clear('d'): True,
                                 on('e'): 'b', clear('e'): True,
+                                },  # initial state
+                               {on('a'): 'b', on('c'): 'd', on('b'): 'e', on('d'): 'table', on('e'): 'table'})  # goal
+    return problem
+
+"""
+         D
+         C
+      -> B -> C   ->   A
+E   D    A    D E    C B
+B A C    E    B A    D E
+""" 
+
+def problem_3a():
+    """
+             D
+             C
+          -> B
+    E   D    A
+    B A C    E
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): True,
+                                on('b'): 'table',  clear('b'): False,
+                                on('c'): 'table', clear('c'): False,
+                                on('d'): 'c', clear('d'): True,
+                                on('e'): 'b', clear('e'): True,
+                                },  # initial state
+                               {on('a'): 'b', on('c'): 'd', on('b'): 'e', on('d'): 'table', on('e'): 'table'})  # goal
+    return problem
+
+def problem_3b():
+    """
+    D
+    C
+    B -> C
+    A    D E
+    E    B A
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'e', clear('a'): False,
+                                on('b'): 'a',  clear('b'): False,
+                                on('c'): 'b', clear('c'): False,
+                                on('d'): 'c', clear('d'): True,
+                                on('e'): 'table', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'table', on('c'): 'd', on('b'): 'table', on('d'): 'b', on('e'): 'a'})  # goal
+    return problem
+
+def problem_3c():
+    """
+    C        A
+    D E -> C B
+    B A    D E
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): False,
+                                on('b'): 'table',  clear('b'): False,
+                                on('c'): 'd', clear('c'): True,
+                                on('d'): 'b', clear('d'): False,
+                                on('e'): 'a', clear('e'): True,
                                 },  # initial state
                                {on('a'): 'b', on('c'): 'd', on('b'): 'e', on('d'): 'table', on('e'): 'table'})  # goal
     return problem
@@ -202,20 +326,22 @@ def count_mismatches(state, goal):
     return -fuckup
 
 
-def benchmark(problem, heuristic, reps, show_plan=False):
+def benchmark(problems, heuristic, reps, show_plan=False):
     sum = 0
 
-    for _ in range(reps):
-        searcher = SearcherMPP(Forward_STRIPS(problem, heuristic))  # A*
-        searcher.max_display_level = 0
-        t1 = time.time_ns()
-        plan = searcher.search()
-        dt = time.time_ns() - t1
-        sum += dt
+    for problem in problems:
+        for _ in range(reps):
+            searcher = SearcherMPP(Forward_STRIPS(problem, heuristic))  # A*
+            searcher.max_display_level = 0
+            t1 = time.time_ns()
+            plan = searcher.search()
+            dt = time.time_ns() - t1
+            sum += dt
+
+        if show_plan:
+            print(f"Plan: {plan}")     
 
     avg_time = sum / reps
-    if show_plan:
-        print(f"Plan: {plan}")
     # print(f"Average time (ns): {sum / reps}")
 
     return avg_time
@@ -223,20 +349,35 @@ def benchmark(problem, heuristic, reps, show_plan=False):
 
 def main():
     result = {}
-    result["case_1_naive"] = benchmark(
-        problem_1(), no_heur, 100, show_plan=True)
-    result["case_2_naive"] = benchmark(
-        problem_2(), no_heur, 100, show_plan=True)
-    result["case_3_naive"] = benchmark(
-        problem_3(), no_heur, 100, show_plan=True)
+    # result["case_1_naive"] = benchmark(
+    #     [problem_1()], no_heur, 100, show_plan=True)
+    # result["case_2_naive"] = benchmark(
+    #     [problem_2()], no_heur, 100, show_plan=True)
+    # result["case_3_naive"] = benchmark(
+    #     [problem_3()], no_heur, 100, show_plan=True)
 
-    result["case_1_heuristic"] = benchmark(
-        problem_1(), count_mismatches, 100)
-    result["case_2_heuristic"] = benchmark(
-        problem_2(), count_mismatches, 100)
-    result["case_3_heuristic"] = benchmark(
-        problem_3(), count_mismatches, 100)
+    # result["case_1_heuristic"] = benchmark(
+    #     [problem_1()], count_mismatches, 100)
+    # result["case_2_heuristic"] = benchmark(
+    #     [problem_2()], count_mismatches, 100)
+    # result["case_3_heuristic"] = benchmark(
+    #     [problem_3()], count_mismatches, 100)
+    
 
+    result["case_1_with_sub-goals_naive"] = benchmark(
+        [problem_1a(), problem_1b(), problem_1c()], no_heur, 100, show_plan=True)
+    result["case_2_with_sub-goals_naive"] = benchmark(
+        [problem_2a(), problem_2b(), problem_2c()], no_heur, 100, show_plan=True)
+    result["case_3_with_sub-goals_naive"] = benchmark(
+        [problem_3a(), problem_3b(), problem_3c()], no_heur, 100, show_plan=True)
+    
+    result["case_1_with_sub-goals_heuristic"] = benchmark(
+        [problem_1a(), problem_1b(), problem_1c()], count_mismatches, 100)
+    result["case_2_with_sub-goals_heuristic"] = benchmark(
+        [problem_2a(), problem_2b(), problem_2c()], count_mismatches, 100)
+    result["case_3_with_sub-goals_heuristic"] = benchmark(
+        [problem_3a(), problem_3b(), problem_3c()], count_mismatches, 100)
+    
     pprint(result)
 
 
