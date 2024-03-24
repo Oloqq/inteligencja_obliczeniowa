@@ -69,20 +69,40 @@ def blocks_1():
     return blocks1
 
 
-def blocks_4_actions():
+def problem_1():
     """
-      D
-      B -> A C
-    A C    B D
+        D    A
+        B -> E C
+    E A C    B D
     """
-    domain = create_blocks_world({'a', 'b', 'c', 'd'})
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
     problem = Planning_problem(domain,
                                {on('a'): 'table', clear('a'): True,
                                 on('b'): 'c',  clear('b'): False,
                                 on('c'): 'table', clear('c'): False,
                                 on('d'): 'b', clear('d'): True,
+                                on('e'): 'table', clear('e'): True,
                                 },  # initial state
-                               {on('a'): 'b', on('c'): 'd', on('b'): 'table', on('d'): 'table'})  # goal
+                               {on('a'): 'e', on('c'): 'd', on('b'): 'table', on('d'): 'table', on('e'): 'b'})  # goal
+    return problem
+
+def problem_2():
+    """
+    A
+    B
+    C -> A
+    D    E D
+    E    C B 
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'b', clear('a'): True,
+                                on('b'): 'c',  clear('b'): False,
+                                on('c'): 'd', clear('c'): False,
+                                on('d'): 'e', clear('d'): False,
+                                on('e'): 'table', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'e', on('c'): 'table', on('b'): 'table', on('d'): 'b', on('e'): 'c'})  # goal
     return problem
 
 
