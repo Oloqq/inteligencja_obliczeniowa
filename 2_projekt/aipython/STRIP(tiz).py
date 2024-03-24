@@ -105,6 +105,23 @@ def problem_2():
                                {on('a'): 'e', on('c'): 'table', on('b'): 'table', on('d'): 'b', on('e'): 'c'})  # goal
     return problem
 
+def problem_3():
+    """
+               A
+    E   D    C B
+    B A C -> D E
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): True,
+                                on('b'): 'table',  clear('b'): False,
+                                on('c'): 'table', clear('c'): False,
+                                on('d'): 'c', clear('d'): True,
+                                on('e'): 'b', clear('e'): True,
+                                },  # initial state
+                               {on('a'): 'b', on('c'): 'd', on('b'): 'e', on('d'): 'table', on('e'): 'table'})  # goal
+    return problem
+
 
 def no_heur(state, goal):
     return 0
