@@ -2,6 +2,7 @@ from searchMPP import SearcherMPP
 from stripsProblem import *
 from stripsForwardPlanner import *
 import time
+from pprint import pprint
 
 
 def move(x, y, z):
@@ -85,25 +86,50 @@ def blocks_4_actions():
     return problem
 
 
-def main():
-    reps = 100
+def no_heur(state, goal):
+    return 0
 
-    # problem = blocks_1()
-    problem = blocks_4_actions()
 
+def count_mismatches(state, goal):
+    fuckup = 0
+    for key, val in goal.items():
+        assert key in state
+        fuckup += val == state[key]
+
+    return -fuckup
+
+
+def benchmark(problem, heuristic, reps):
     sum = 0
 
     for _ in range(reps):
-        searcher = SearcherMPP(Forward_STRIPS(problem))  # A*
+        searcher = SearcherMPP(Forward_STRIPS(problem, heuristic))  # A*
+        searcher.max_display_level = 0
         t1 = time.time_ns()
         plan = searcher.search()
         dt = time.time_ns() - t1
         sum += dt
 
-    print(f"Average time (ns): {sum / reps}")
+    avg_time = sum / reps
+    # print(f"Average time (ns): {sum / reps}")
 
-    with open("result.txt", "w") as f:
-        f.write(str(plan))
+    return avg_time
+
+
+def main():
+    result = {}
+    result["case_1_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
+    # result["case_2_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
+    # result["case_3_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
+
+    result["case_1_heuristic"] = benchmark(
+        blocks_4_actions(), count_mismatches, 100)
+    # result["case_2_heuristic"] = benchmark(
+    #     blocks_4_actions(), count_mismatches, 100)
+    # result["case_3_heuristic"] = benchmark(
+    #     blocks_4_actions(), count_mismatches, 100)
+
+    pprint(result)
 
 
 if __name__ == "__main__":
