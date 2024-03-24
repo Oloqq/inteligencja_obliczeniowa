@@ -57,7 +57,7 @@ def count_mismatches(state, goal):
 
     return -error
 ```
-W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką oraz bez niej (metoda naiwna).
+W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką (heuristic) oraz bez niej (naive). Czas dla każdego przypadku został zmierzony 100 razy żeby zredukować wpływ losowych czynników na czas wykonania. Prezentowane wartości to średnie.
 ```
 {'case_1_heuristic': 1857514.0,
  'case_1_naive':     174237136.0,
