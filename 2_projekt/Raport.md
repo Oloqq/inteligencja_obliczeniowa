@@ -62,4 +62,8 @@ W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką oraz
 Otrzymane wyniki pokazują, że zastosowanie heurystyki pozwala znacząco zredukować czas potrzebny na znalezienie rozwiązania, nawet o dwa rzędy wielkości, co demonstruje skuteczność heurystyki w poprawie wydajności algorytmu planowania.
 
 # Na 4.0
-TO DO
+1. **Zdefiniowanie podceli dla problemów**
+
+
+
+2. **Rozwiązanie ponownie problemów z podcelami z heurystyką i bez**

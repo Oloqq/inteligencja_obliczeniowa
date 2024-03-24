@@ -87,6 +87,70 @@ def problem_1():
     return problem
 
 
+"""
+	     C
+	     E
+    D -> A -> 	A -> A
+    B 	 D    C	B    E C
+E A C    B    E D    B D
+"""
+
+def problem_1a():
+    """
+    	     C
+	         E
+        D -> A
+        B 	 D
+    E A C    B
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'table', clear('a'): True,
+                                on('b'): 'c',  clear('b'): False,
+                                on('c'): 'table', clear('c'): False,
+                                on('d'): 'b', clear('d'): True,
+                                on('e'): 'table', clear('e'): True,
+                                },  # initial state
+                               {on('a'): 'd', on('c'): 'e', on('b'): 'table', on('d'): 'b', on('e'): 'a'})  # goal
+    return problem
+
+def problem_1b():
+    """
+    C
+    E
+    A ->   A
+    D    C B
+    B    E D
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'd', clear('a'): False,
+                                on('b'): 'table',  clear('b'): False,
+                                on('c'): 'e', clear('c'): True,
+                                on('d'): 'b', clear('d'): False,
+                                on('e'): 'a', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'b', on('c'): 'e', on('b'): 'd', on('d'): 'table', on('e'): 'table'})  # goal
+    return problem
+
+def problem_1c():
+    """
+    A      A
+    C B -> E C
+    E D    B D
+    """
+    domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
+    problem = Planning_problem(domain,
+                               {on('a'): 'c', clear('a'): True,
+                                on('b'): 'd',  clear('b'): True,
+                                on('c'): 'e', clear('c'): False,
+                                on('d'): 'table', clear('d'): False,
+                                on('e'): 'b', clear('e'): False,
+                                },  # initial state
+                               {on('a'): 'e', on('c'): 'd', on('b'): 'table', on('d'): 'table', on('e'): 'b'})  # goal
+    return problem
+
+
 def problem_2():
     """
     A
