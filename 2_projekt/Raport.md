@@ -18,7 +18,7 @@ Wybrana dziedzina STRIPS dotyczy układania klocków na stole, co jest klasyczny
         E    C B
 
 3.   ```
-                A
+                 A
         E   D    C B
         B A C -> D E
         ```
