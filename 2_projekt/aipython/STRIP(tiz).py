@@ -86,13 +86,14 @@ def problem_1():
                                {on('a'): 'e', on('c'): 'd', on('b'): 'table', on('d'): 'table', on('e'): 'b'})  # goal
     return problem
 
+
 def problem_2():
     """
     A
     B
     C -> A
     D    E D
-    E    C B 
+    E    C B
     """
     domain = create_blocks_world({'a', 'b', 'c', 'd', 'e'})
     problem = Planning_problem(domain,
@@ -104,6 +105,7 @@ def problem_2():
                                 },  # initial state
                                {on('a'): 'e', on('c'): 'table', on('b'): 'table', on('d'): 'b', on('e'): 'c'})  # goal
     return problem
+
 
 def problem_3():
     """
@@ -155,18 +157,26 @@ def benchmark(problem, heuristic, reps):
 
 def main():
     result = {}
-    result["case_1_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
-    # result["case_2_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
-    # result["case_3_naive"] = benchmark(blocks_4_actions(), no_heur, 100)
+    result["case_1_naive"] = benchmark(problem_1(), no_heur, 100)
+    result["case_2_naive"] = benchmark(problem_2(), no_heur, 100)
+    result["case_3_naive"] = benchmark(problem_3(), no_heur, 100)
 
     result["case_1_heuristic"] = benchmark(
-        blocks_4_actions(), count_mismatches, 100)
-    # result["case_2_heuristic"] = benchmark(
-    #     blocks_4_actions(), count_mismatches, 100)
-    # result["case_3_heuristic"] = benchmark(
-    #     blocks_4_actions(), count_mismatches, 100)
+        problem_1(), count_mismatches, 100)
+    result["case_2_heuristic"] = benchmark(
+        problem_2(), count_mismatches, 100)
+    result["case_3_heuristic"] = benchmark(
+        problem_3(), count_mismatches, 100)
 
     pprint(result)
+
+
+# {'case_1_heuristic': 1857514.0,
+#  'case_1_naive':     174237136.0,
+#  'case_2_heuristic': 946137.0,
+#  'case_2_naive':     121888077.0,
+#  'case_3_heuristic': 1375991.0,
+#  'case_3_naive':     185659843.0}
 
 
 if __name__ == "__main__":
