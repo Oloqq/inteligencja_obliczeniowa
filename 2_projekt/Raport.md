@@ -3,53 +3,60 @@
 Olgierd Piofczyk, Kaja Dzielnicka
 
 # Na 3.0
-1. **Wybór dziedziny STRIPS i definicja problemów**
+## Wybór dziedziny STRIPS i definicja problemów
 
 Wybrana dziedzina STRIPS dotyczy układania klocków na stole, co jest klasycznym problemem w dziedzinie planowania i sztucznej inteligencji. Zadanie polega na przenoszeniu klocków tak, aby osiągnąć określony układ końcowy, zaczynając od danego układu początkowego. Problemy przez nas zdefiniowane to trzy różne scenariusze układania klocków:
--   ```
-        D    A
-        B -> E C
-    E A C    B D
-    ```
+1.  ```
+            D    A
+            B -> E C
+        E A C    B D
+2.  ```
+        A
+        B
+        C -> A
+        D    E D
+        E    C B
 
--   ```
-    A
-    B
-    C -> A
-    D    E D
-    E    C B
-    ```
-
--   ```
-               A
-    E   D    C B
-    B A C -> D E
-    ```
-2. **Rozwiązanie problemu metodą forward planning**
+3.   ```
+                A
+        E   D    C B
+        B A C -> D E
+        ```
+## Rozwiązanie problemu metodą forward planning
 
 Rozwiązanie problemów polega na zastosowaniu metody forward planning, która systematycznie przeszukuje przestrzeń stanów od stanu początkowego do stanu końcowego, rozważając wszystkie możliwe akcje. Dla każdego z zdefiniowanych problemów algorytm forward planning jest użyty do znalezienia sekwencji ruchów, które transformują układ początkowy w układ końcowy. Oto rozwiązania dla każdego z problemów:
--   ```
-    rozwiazanie dla problemu 1
-    ```
--   ```
-    rozwiazanie dla problemu 2
-    ```
--   ```
-    rozwiazanie dla problemu 3
-    ```
+1. Problem 1
+   - move_d_from_b_to_table
+   - move_b_from_c_to_table
+   - move_e_from_table_to_b
+   - move_a_from_table_to_e
+   - move_c_from_table_to_d
+2. Problem 2
+   - move_a_from_b_to_table
+   - move_b_from_c_to_table
+   - move_c_from_d_to_table
+   - move_d_from_e_to_b
+   - move_e_from_table_to_c
+   - move_a_from_table_to_e
+3. Problem 3
+   - move_e_from_b_to_table
+   - move_b_from_table_to_e
+   - move_d_from_c_to_table
+   - move_c_from_table_to_d
+   - move_a_from_table_to_b
 
-3. **Propozycja heurystyki do problemu**
+## Propozycja heurystyki do problemu
 
-Prezentowana heurystyka `count_mismatches` służy do oceny obecnego stanu względem stanu koncowego poprzez zliczanie liczby błędów (niedopasowań). Błąd jest zliczany, gdy pozycja klocka w obecnym stanie nie odpowiada jego pozycji w stanie docelowym. Kod heurystyki: 
+Prezentowana heurystyka `count_mismatches` służy do oceny obecnego stanu względem stanu koncowego poprzez zliczanie liczby błędów (niedopasowań). Błąd jest zliczany, gdy pozycja klocka w obecnym stanie nie odpowiada jego pozycji w stanie docelowym. Kod heurystyki:
 ``` python
 def count_mismatches(state, goal):
-    fuckup = 0
+    error = 0
     for key, val in goal.items():
         assert key in state
-        fuckup += val == state[key]
+        error += val == state[key]
 
-    return -fuckup
-``` 
+    return -error
+```
 W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką oraz bez niej (metoda naiwna).
 ```
 {'case_1_heuristic': 1857514.0,
@@ -59,7 +66,7 @@ W wyniku eksperymentów porównano czasy działania algorytmu z heurystyką oraz
  'case_3_heuristic': 1375991.0,
  'case_3_naive':     185659843.0}
 ```
-Otrzymane wyniki pokazują, że zastosowanie heurystyki pozwala znacząco zredukować czas potrzebny na znalezienie rozwiązania, nawet o dwa rzędy wielkości, co demonstruje skuteczność heurystyki w poprawie wydajności algorytmu planowania.
+Otrzymane wyniki pokazują, że zastosowanie heurystyki pozwala znacząco zredukować czas potrzebny na znalezienie rozwiązania, nawet o kilka rzędów wielkości, co demonstruje skuteczność heurystyki w poprawie wydajności algorytmu planowania.
 
 # Na 4.0
 1. **Zdefiniowanie podceli dla problemów**

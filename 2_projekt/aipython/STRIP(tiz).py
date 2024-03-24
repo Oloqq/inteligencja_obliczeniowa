@@ -202,7 +202,7 @@ def count_mismatches(state, goal):
     return -fuckup
 
 
-def benchmark(problem, heuristic, reps):
+def benchmark(problem, heuristic, reps, show_plan=False):
     sum = 0
 
     for _ in range(reps):
@@ -214,6 +214,8 @@ def benchmark(problem, heuristic, reps):
         sum += dt
 
     avg_time = sum / reps
+    if show_plan:
+        print(f"Plan: {plan}")
     # print(f"Average time (ns): {sum / reps}")
 
     return avg_time
@@ -221,9 +223,12 @@ def benchmark(problem, heuristic, reps):
 
 def main():
     result = {}
-    result["case_1_naive"] = benchmark(problem_1(), no_heur, 100)
-    result["case_2_naive"] = benchmark(problem_2(), no_heur, 100)
-    result["case_3_naive"] = benchmark(problem_3(), no_heur, 100)
+    result["case_1_naive"] = benchmark(
+        problem_1(), no_heur, 100, show_plan=True)
+    result["case_2_naive"] = benchmark(
+        problem_2(), no_heur, 100, show_plan=True)
+    result["case_3_naive"] = benchmark(
+        problem_3(), no_heur, 100, show_plan=True)
 
     result["case_1_heuristic"] = benchmark(
         problem_1(), count_mismatches, 100)
