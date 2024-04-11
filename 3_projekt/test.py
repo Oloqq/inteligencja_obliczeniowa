@@ -12,8 +12,21 @@ mapping = {"w": np.array([0, 0.7, 0]),
            "as": np.array([-1, 0, 1]),
            }
 default_action = np.array([0, 0, 0])
-play(gym.make("CarRacing-v2", render_mode="rgb_array"), keys_to_action=mapping,
-     noop=default_action)
+env = gym.make("CarRacing-v2", render_mode="rgb_array")
+# env.reset(options={'randomize': True})
+
+# env.reset()
+# for _ in range(10000):
+#     env.step(np.array([0, 0.7, 0]))
+
+seed = 1
+env.reset(seed=seed)
+for _ in range(100):
+    action = np.array([0, 0.7, 0])
+    env.step(action)
+
+play(env, keys_to_action=mapping, noop=default_action)
+# play(env, keys_to_action=mapping, noop=default_action)
 
 
 # env = gym.make("CarRacing-v2", render_mode="human")
