@@ -7,6 +7,8 @@ import torch.nn as nn
 from torch.distributions.normal import Normal
 import random
 
+from torch.optim import AdamW as Ewa
+
 import gymnasium as gym
 
 
@@ -87,7 +89,7 @@ class REINFORCE:
         self.rewards = []  # Stores the corresponding rewards
 
         self.net = Policy_Network(obs_space_dims, action_space_dims)
-        self.optimizer = torch.optim.AdamW(self.net.parameters(), lr=self.learning_rate)
+        self.optimizer = Ewa(self.net.parameters(), lr=self.learning_rate)
 
     def sample_action(self, state: np.ndarray) -> float:
         """Returns an action, conditioned on the policy and observation.
