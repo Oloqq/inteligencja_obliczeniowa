@@ -1,161 +1,68 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import torch
-import torch.nn as nn
-from torch.distributions.normal import Normal
-import random
-
-from torch.optim import AdamW as Ewa
-
 import gymnasium as gym
+import numpy as np
+import matplotlib.pyplot as plt
+import pickle
 
+def run(episodes, is_training=True, render=False):
 
-plt.rcParams["figure.figsize"] = (10, 5)
+    env = gym.make('Taxi-v3', render_mode='human' if render else None)
 
-class Policy_Network(nn.Module):
-    """Parametrized Policy Network."""
+    if(is_training):
+        q = np.zeros((env.observation_space.n, env.action_space.n)) # init a 64 x 4 array
+    else:
+        f = open('taxi.pkl', 'rb')
+        q = pickle.load(f)
+        f.close()
 
-    def __init__(self, obs_space_dims: int, action_space_dims: int):
-        super().__init__()
-        self.embedding = nn.Embedding(obs_space_dims, 10)  # Embedding layer example
-        hidden_space1 = 16
-        hidden_space2 = 32
+    learning_rate_a = 0.9 # alpha or learning rate
+    discount_factor_g = 0.9 # gamma or discount rate. Near 0: more weight/reward placed on immediate state. Near 1: more on future state.
+    epsilon = 1         # 1 = 100% random actions
+    epsilon_decay_rate = 0.0001        # epsilon decay rate. 1/0.0001 = 10,000
+    rng = np.random.default_rng()   # random number generator
 
-        self.shared_net = nn.Sequential(
-            nn.Linear(10, hidden_space1),
-            nn.ReLU(),
-            nn.Linear(hidden_space1, hidden_space2),
-            nn.ReLU(),
-        )
+    rewards_per_episode = np.zeros(episodes)
 
-        self.policy_net = nn.Sequential(
-            nn.Linear(hidden_space2, action_space_dims),
-            nn.Softmax(dim=1)
-        )
+    for i in range(episodes):
+        state = env.reset()[0]  # states: 0 to 63, 0=top left corner,63=bottom right corner
+        terminated = False      # True when fall in hole or reached goal
+        truncated = False       # True when actions > 200
 
-    def forward(self, x: torch.Tensor):
-        x = self.embedding(x).view(1, -1)
-        shared_features = self.shared_net(x)
-        action_probs = self.policy_net(shared_features)
-        return action_probs
+        while(not terminated and not truncated):
+            if is_training and rng.random() < epsilon:
+                action = env.action_space.sample() # actions: 0=left,1=down,2=right,3=up
+            else:
+                action = np.argmax(q[state,:])
 
-class REINFORCE:
-    """REINFORCE algorithm."""
+            new_state,reward,terminated,truncated,_ = env.step(action)
 
-    def __init__(self, obs_space_dims: int, action_space_dims: int):
-        """Initializes an agent that learns a policy via REINFORCE algorithm [1]
-        to solve the task at hand (Inverted Pendulum v4).
+            if is_training:
+                q[state,action] = q[state,action] + learning_rate_a * (
+                    reward + discount_factor_g * np.max(q[new_state,:]) - q[state,action]
+                )
 
-        Args:
-            obs_space_dims: Dimension of the observation space
-            action_space_dims: Dimension of the action space
-        """
+            state = new_state
 
-        # Hyperparameters
-        self.learning_rate = 1e-4  # Learning rate for policy optimization
-        self.gamma = 0.9  # Discount factor
-        self.eps = 1e-6  # small number for mathematical stability
+        epsilon = max(epsilon - epsilon_decay_rate, 0)
 
-        self.probs = []  # Stores probability values of the sampled action
-        self.rewards = []  # Stores the corresponding rewards
+        if(epsilon==0):
+            learning_rate_a = 0.0001
 
-        self.net = Policy_Network(obs_space_dims, action_space_dims)
-        self.optimizer = Ewa(self.net.parameters(), lr=self.learning_rate)
+        rewards_per_episode[i] = reward
 
-    def sample_action(self, state):
-        state = torch.tensor([state], dtype=torch.int64)
-        action_probs = self.net(state)
-        distrib = torch.distributions.Categorical(action_probs)
-        action = distrib.sample()
-        prob = distrib.log_prob(action)
-        self.probs.append(prob)
-        return action.item()
+    env.close()
 
-    def update(self):
-        """Updates the policy network's weights."""
-        running_g = 0
-        gs = []
+    sum_rewards = np.zeros(episodes)
+    for t in range(episodes):
+        sum_rewards[t] = np.sum(rewards_per_episode[max(0, t-100):(t+1)])
+    plt.plot(sum_rewards)
+    plt.savefig('taxi.png')
 
-        # Discounted return (backwards) - [::-1] will return an array in reverse
-        for R in self.rewards[::-1]:
-            running_g = R + self.gamma * running_g
-            gs.insert(0, running_g)
+    if is_training:
+        f = open("taxi.pkl","wb")
+        pickle.dump(q, f)
+        f.close()
 
-        deltas = torch.tensor(gs)
+if __name__ == '__main__':
+    # run(15000)
 
-        loss = 0
-        # minimize -1 * prob * reward obtained
-        for log_prob, delta in zip(self.probs, deltas):
-            loss += log_prob.mean() * delta * (-1)
-
-        # Update the policy network
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-        # Empty / zero out all episode-centric/related variables
-        self.probs = []
-        self.rewards = []
-
-# Create and wrap the environment
-env = gym.make("Taxi-v3")
-wrapped_env = gym.wrappers.RecordEpisodeStatistics(env, 50)  # Records episode-reward
-
-total_num_episodes = int(5e3)  # Total number of episodes
-# Observation-space of InvertedPendulum-v4 (4)
-obs_space_dims = 500
-print(obs_space_dims)
-# Action-space of InvertedPendulum-v4 (1)
-action_space_dims = 6
-print(action_space_dims)
-rewards_over_seeds = []
-
-for seed in [1, 2, 3, 5, 8]:  # Fibonacci seeds
-    # set seed
-    torch.manual_seed(seed)
-    random.seed(seed)
-    np.random.seed(seed)
-
-    # Reinitialize agent every seed
-    agent = REINFORCE(obs_space_dims, action_space_dims)
-    reward_over_episodes = []
-
-    for episode in range(total_num_episodes):
-        # gymnasium v26 requires users to set seed while resetting the environment
-        obs, info = wrapped_env.reset(seed=seed)
-
-        done = False
-        while not done:
-            action = agent.sample_action(obs)
-
-            # Step return type - `tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]`
-            # These represent the next observation, the reward from the step,
-            # if the episode is terminated, if the episode is truncated and
-            # additional info from the step
-            obs, reward, terminated, truncated, info = wrapped_env.step(action)
-            agent.rewards.append(reward)
-
-            # End the episode when either truncated or terminated is true
-            #  - truncated: The episode duration reaches max number of timesteps
-            #  - terminated: Any of the state space values is no longer finite.
-            done = terminated or truncated
-
-        reward_over_episodes.append(wrapped_env.return_queue[-1])
-        agent.update()
-
-        if episode % 1000 == 0:
-            avg_reward = int(np.mean(wrapped_env.return_queue))
-            print("Episode:", episode, "Average Reward:", avg_reward)
-
-    rewards_over_seeds.append(reward_over_episodes)
-
-rewards_to_plot = [[reward[0] for reward in rewards] for rewards in rewards_over_seeds]
-df1 = pd.DataFrame(rewards_to_plot).melt()
-df1.rename(columns={"variable": "episodes", "value": "reward"}, inplace=True)
-sns.set(style="darkgrid", context="talk", palette="rainbow")
-sns.lineplot(x="episodes", y="reward", data=df1).set(
-    title="REINFORCE for InvertedPendulum-v4"
-)
-plt.show()
+    run(3000, is_training=True, render=False)
