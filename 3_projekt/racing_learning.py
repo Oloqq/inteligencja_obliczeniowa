@@ -27,7 +27,7 @@ class Policy_Network(nn.Module):
         """
         super().__init__()
 
-        hidden_space1 = 16  # Nothing special with 16, feel free to change
+        hidden_space1 = 3  # Nothing special with 16, feel free to change
         hidden_space2 = 32  # Nothing special with 32, feel free to change
 
         # Shared Network
@@ -142,16 +142,16 @@ class REINFORCE:
         self.rewards = []
 
 # Create and wrap the environment
-env = gym.make("InvertedPendulum-v4")
+env = gym.make("CarRacing-v2")
 wrapped_env = gym.wrappers.RecordEpisodeStatistics(env, 50)  # Records episode-reward
 
 total_num_episodes = int(5e3)  # Total number of episodes
 # Observation-space of InvertedPendulum-v4 (4)
-obs_space_dims = env.observation_space.shape[0]
-print(obs_space_dims)
+print(env.observation_space.shape)
+h, w, dp = env.observation_space.shape
+obs_space_dims = h * w * dp
 # Action-space of InvertedPendulum-v4 (1)
-action_space_dims = env.action_space.shape[0]
-print(action_space_dims)
+action_space_dims = 3
 rewards_over_seeds = []
 
 for seed in [1, 2, 3, 5, 8]:  # Fibonacci seeds

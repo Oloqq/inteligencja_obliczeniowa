@@ -18,55 +18,28 @@ class Policy_Network(nn.Module):
     """Parametrized Policy Network."""
 
     def __init__(self, obs_space_dims: int, action_space_dims: int):
-        """Initializes a neural network that estimates the mean and standard deviation
-         of a normal distribution from which an action is sampled from.
-
-        Args:
-            obs_space_dims: Dimension of the observation space
-            action_space_dims: Dimension of the action space
-        """
         super().__init__()
+        self.embedding = nn.Embedding(obs_space_dims, 10)  # Embedding layer example
+        hidden_space1 = 16
+        hidden_space2 = 32
 
-        hidden_space1 = 16  # Nothing special with 16, feel free to change
-        hidden_space2 = 32  # Nothing special with 32, feel free to change
-
-        # Shared Network
         self.shared_net = nn.Sequential(
-            nn.Linear(obs_space_dims, hidden_space1),
-            nn.Tanh(),
+            nn.Linear(10, hidden_space1),
+            nn.ReLU(),
             nn.Linear(hidden_space1, hidden_space2),
-            nn.Tanh(),
+            nn.ReLU(),
         )
 
-        # Policy Mean specific Linear Layer
-        self.policy_mean_net = nn.Sequential(
-            nn.Linear(hidden_space2, action_space_dims)
-        )
-
-        # Policy Std Dev specific Linear Layer
-        self.policy_stddev_net = nn.Sequential(
-            nn.Linear(hidden_space2, action_space_dims)
+        self.policy_net = nn.Sequential(
+            nn.Linear(hidden_space2, action_space_dims),
+            nn.Softmax(dim=1)
         )
 
     def forward(self, x: torch.Tensor):
-        """Conditioned on the observation, returns the mean and standard deviation
-         of a normal distribution from which an action is sampled from.
-
-        Args:
-            x: Observation from the environment
-
-        Returns:
-            action_means: predicted mean of the normal distribution
-            action_stddevs: predicted standard deviation of the normal distribution
-        """
-        shared_features = self.shared_net(x.float())
-
-        action_means = self.policy_mean_net(shared_features)
-        action_stddevs = torch.log(
-            1 + torch.exp(self.policy_stddev_net(shared_features))
-        )
-
-        return action_means, action_stddevs
+        x = self.embedding(x).view(1, -1)
+        shared_features = self.shared_net(x)
+        action_probs = self.policy_net(shared_features)
+        return action_probs
 
 class REINFORCE:
     """REINFORCE algorithm."""
@@ -82,7 +55,7 @@ class REINFORCE:
 
         # Hyperparameters
         self.learning_rate = 1e-4  # Learning rate for policy optimization
-        self.gamma = 0.99  # Discount factor
+        self.gamma = 0.9  # Discount factor
         self.eps = 1e-6  # small number for mathematical stability
 
         self.probs = []  # Stores probability values of the sampled action
@@ -91,29 +64,14 @@ class REINFORCE:
         self.net = Policy_Network(obs_space_dims, action_space_dims)
         self.optimizer = Ewa(self.net.parameters(), lr=self.learning_rate)
 
-    def sample_action(self, state: np.ndarray) -> float:
-        """Returns an action, conditioned on the policy and observation.
-
-        Args:
-            state: Observation from the environment
-
-        Returns:
-            action: Action to be performed
-        """
-        state = torch.tensor(np.array([state]))
-        action_means, action_stddevs = self.net(state)
-
-        # create a normal distribution from the predicted
-        #   mean and standard deviation and sample an action
-        distrib = Normal(action_means[0] + self.eps, action_stddevs[0] + self.eps)
+    def sample_action(self, state):
+        state = torch.tensor([state], dtype=torch.int64)
+        action_probs = self.net(state)
+        distrib = torch.distributions.Categorical(action_probs)
         action = distrib.sample()
         prob = distrib.log_prob(action)
-
-        action = action.numpy()
-
         self.probs.append(prob)
-
-        return action
+        return action.item()
 
     def update(self):
         """Updates the policy network's weights."""
@@ -142,16 +100,16 @@ class REINFORCE:
         self.rewards = []
 
 # Create and wrap the environment
-env = gym.make("CarRacing-v2")
+env = gym.make("Taxi-v3")
 wrapped_env = gym.wrappers.RecordEpisodeStatistics(env, 50)  # Records episode-reward
 
 total_num_episodes = int(5e3)  # Total number of episodes
 # Observation-space of InvertedPendulum-v4 (4)
-print(env.observation_space.shape)
-h, w, dp = env.observation_space.shape
-obs_space_dims = h * w * 1
+obs_space_dims = 500
+print(obs_space_dims)
 # Action-space of InvertedPendulum-v4 (1)
-action_space_dims = 3
+action_space_dims = 6
+print(action_space_dims)
 rewards_over_seeds = []
 
 for seed in [1, 2, 3, 5, 8]:  # Fibonacci seeds
