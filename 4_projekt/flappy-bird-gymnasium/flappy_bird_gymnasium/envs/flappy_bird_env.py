@@ -104,7 +104,7 @@ class FlappyBirdEnv(gymnasium.Env):
         bird_color: str = "yellow",
         pipe_color: str = "green",
         render_mode: Optional[str] = None,
-        background: Optional[str] = "day",
+        background: Optional[str] = "minecraft",
         score_limit: Optional[int] = None,
         debug: bool = False,
     ) -> None:
