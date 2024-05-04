@@ -103,6 +103,8 @@ def load_images(
         # Background sprite:
         images["background"] = _load_sprite(f"cave.png", convert=convert, alpha=False)
 
+        images["creeper"] = _load_sprite(f"oh_meeen.png", convert=convert, alpha=False)
+
         # Bird sprites:
         images["player"] = (
             _load_sprite(f"steve.png", convert=convert, alpha=True),

@@ -10,6 +10,7 @@ from minecraft.envs import utils
 from minecraft.envs.constants import (
     WINDOW_WIDTH, WINDOW_HEIGHT,
     PLAYER_WIDTH, PLAYER_HEIGHT,
+    CREEPER_WIDTH, CREEPER_HEIGHT,
 )
 
 class Actions(IntEnum):
@@ -66,7 +67,7 @@ class MinecraftEnv(gymnasium.Env):
     def step(self, action: Union[Actions, int],
     ) -> Tuple[np.ndarray, float, bool, Dict]:
         terminal = False
-        reward = None
+        reward = 0
 
         self._sound_cache = None
         if action == Actions.RIGHT and self._player_x < 2:
@@ -83,34 +84,15 @@ class MinecraftEnv(gymnasium.Env):
         #         reward = 1  # reward for passed pipe
         #         self._sound_cache = "point"
 
-        # player's movement
-        # if self._player_vel_y < PLAYER_MAX_VEL_Y and not self._player_flapped:
-        #     self._player_vel_y += PLAYER_ACC_Y
-
-        # if self._player_flapped:
-        #     self._player_flapped = False
-
-        #     # more rotation to cover the threshold
-        #     # (calculated in visible rotation)
-        #     self._player_rot = 45
-
-        # move pipes to left
-        # for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
-        #     up_pipe["x"] += PIPE_VEL_X
-        #     low_pipe["x"] += PIPE_VEL_X
-
-        #     # it is out of the screen
-        #     if up_pipe["x"] < -PIPE_WIDTH:
-        #         new_up_pipe, new_low_pipe = self._get_random_creeper()
-        #         up_pipe["x"] = new_up_pipe["x"]
-        #         up_pipe["y"] = new_up_pipe["y"]
-        #         low_pipe["x"] = new_low_pipe["x"]
-        #         low_pipe["y"] = new_low_pipe["y"]
+        aww_meeeeen = []
+        for col, row in self._creepers:
+            aww_meeeeen.append((col, row + 1))
+        self._creepers = aww_meeeeen
 
         if self.render_mode == "human":
             self.render()
 
-        obs = ()
+        obs = () # FIXME
         # obs, reward_private_zone = self._get_observation()
         # if reward is None:
         #     if reward_private_zone is not None:
@@ -118,11 +100,7 @@ class MinecraftEnv(gymnasium.Env):
         #     else:
         #         reward = 0.1  # reward for staying alive
 
-        # agent touch the top of the screen as punishment
-        if self._player_y < 0:
-            reward = -0.5
-
-        # check for crash
+        # FIXME check for crash
         if self._check_crash():
             self._sound_cache = "hit"
             reward = -1  # reward for dying
@@ -153,7 +131,7 @@ class MinecraftEnv(gymnasium.Env):
         self._score = 0
 
         awww_maaaan = self._get_random_creeper()
-        self._creepers = [awww_maaaan]
+        self._creepers = [(awww_maaaan, 0)]
 
         if self.render_mode == "human":
             self.render()
@@ -300,22 +278,14 @@ class MinecraftEnv(gymnasium.Env):
             x_offset += self._images["numbers"][digit].get_width()
 
     def _draw_surface(self, show_score: bool = True) -> None:
-        """Re-draws the renderer's surface.
-
-        This method updates the renderer's surface by re-drawing it according to
-        the current state of the game.
-
-        Args:
-            show_score (bool): Whether to draw the player's score or not.
-        """
-        # Background
         self._surface.blit(self._images["background"], (0, 0))
 
-        # Pipes
-        # for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
-        #     self._surface.blit(self._images["pipe"][0], (up_pipe["x"], up_pipe["y"]))
-        #     self._surface.blit(self._images["pipe"][1], (low_pipe["x"], low_pipe["y"]))
-
+        #   column, row
+        for awwwww, meeeeen in self._creepers:
+            self._surface.blit(
+                self._images["creeper"],
+                (awwwww * CREEPER_WIDTH, meeeeen * CREEPER_HEIGHT)
+                )
 
         # Score
         # (must be drawn before the player, so the player overlaps it)
