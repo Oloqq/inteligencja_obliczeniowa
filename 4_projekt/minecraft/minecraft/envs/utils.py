@@ -84,9 +84,6 @@ def _load_sprite(filename, convert, alpha=True):
 
 def load_images(
     convert: bool = True,
-    bg_type: Optional[str] = "day",
-    bird_color: str = "yellow",
-    pipe_color: str = "green",
 ) -> Dict[str, Any]:
     """Loads and returns the image assets of the game."""
     images = {}
@@ -100,32 +97,19 @@ def load_images(
         # Game over sprite:
         images["gameover"] = _load_sprite("gameover.png", convert=convert, alpha=True)
 
-        # Welcome screen message sprite:
+        # Welcome screen message sprite: FIXME unused
         images["message"] = _load_sprite("message.png", convert=convert, alpha=True)
 
-        # Sprite for the base (ground):
-        images["base"] = _load_sprite("base.png", convert=convert, alpha=True)
-
         # Background sprite:
-        if bg_type is None:
-            images["background"] = None
-        else:
-            images["background"] = _load_sprite(
-                f"background-{bg_type}.png", convert=convert, alpha=False
-            )
+        images["background"] = _load_sprite(f"cave.png", convert=convert, alpha=False)
 
         # Bird sprites:
         images["player"] = (
-            _load_sprite(f"{bird_color}bird-upflap.png", convert=convert, alpha=True),
-            _load_sprite(f"{bird_color}bird-midflap.png", convert=convert, alpha=True),
-            _load_sprite(f"{bird_color}bird-downflap.png", convert=convert, alpha=True),
+            _load_sprite(f"steve.png", convert=convert, alpha=True),
+            _load_sprite(f"steve.png", convert=convert, alpha=True),
+            _load_sprite(f"steve.png", convert=convert, alpha=True),
         )
 
-        # Pipe sprites:
-        pipe_sprite = _load_sprite(
-            f"pipe-{pipe_color}.png", convert=convert, alpha=True
-        )
-        images["pipe"] = (img_flip(pipe_sprite, False, True), pipe_sprite)
     except FileNotFoundError as ex:
         raise FileNotFoundError(
             "Can't find the sprites folder! No such file or"
