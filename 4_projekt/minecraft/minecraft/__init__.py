@@ -31,16 +31,16 @@ import os
 from gymnasium.envs.registration import register
 
 # Exporting envs:
-from minecraft.envs.flappy_bird_env import FlappyBirdEnv
+from minecraft.envs.minecraft_env import MinecraftEnv
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 register(
     id="Minecraft-v0",
-    entry_point="minecraft:FlappyBirdEnv",
+    entry_point="minecraft:MinecraftEnv",
 )
 
 # Main names:
 __all__ = [
-    FlappyBirdEnv.__name__,
+    MinecraftEnv.__name__,
 ]

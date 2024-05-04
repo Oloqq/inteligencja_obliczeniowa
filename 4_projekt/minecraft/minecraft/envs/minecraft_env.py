@@ -29,7 +29,7 @@ class Actions(IntEnum):
     IDLE, FLAP = 0, 1
 
 
-class FlappyBirdEnv(gymnasium.Env):
+class MinecraftEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
     def __init__(
