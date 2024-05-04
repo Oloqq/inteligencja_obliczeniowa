@@ -8,19 +8,8 @@ import pygame
 
 from minecraft.envs import utils
 from minecraft.envs.constants import (
-    BACKGROUND_WIDTH,
-    BASE_WIDTH,
-    FILL_BACKGROUND_COLOR,
-    PIPE_HEIGHT,
-    PIPE_VEL_X,
-    PIPE_WIDTH,
-    PLAYER_ACC_Y,
-    PLAYER_FLAP_ACC,
-    PLAYER_HEIGHT,
-    PLAYER_MAX_VEL_Y,
-    PLAYER_ROT_THR,
-    PLAYER_VEL_ROT,
-    PLAYER_WIDTH,
+    WINDOW_WIDTH, WINDOW_HEIGHT,
+    PLAYER_WIDTH, PLAYER_HEIGHT,
 )
 
 class Actions(IntEnum):
@@ -32,7 +21,7 @@ class MinecraftEnv(gymnasium.Env):
 
     def __init__(
         self,
-        screen_size: Tuple[int, int] = (288, 512),
+        screen_size: Tuple[int, int] = (WINDOW_WIDTH, WINDOW_HEIGHT),
         audio_on: bool = False,
         normalize_obs: bool = True,
         render_mode: Optional[str] = None,
@@ -62,11 +51,9 @@ class MinecraftEnv(gymnasium.Env):
         self._sound_cache = None
         self._bg_type = background
 
-        self._ground = {"x": 0, "y": self._screen_height * 0.79}
-        self._base_shift = BASE_WIDTH - BACKGROUND_WIDTH
         self._creepers = []
 
-        # self._get_observation = self._get_observation_features
+        # self._get_observation = self._get_observation_features # TODO restore
 
         if render_mode is not None:
             self._fps_clock = pygame.time.Clock()
@@ -83,10 +70,7 @@ class MinecraftEnv(gymnasium.Env):
 
         self._sound_cache = None
         if action == Actions.FLAP:
-            if self._player_y > -2 * PLAYER_HEIGHT:
-                self._player_vel_y = PLAYER_FLAP_ACC
-                self._player_flapped = True
-                self._sound_cache = "wing"
+            self._player_x += 1
 
         # check for score
         # player_mid_pos = self._player_x + PLAYER_WIDTH / 2
@@ -96,13 +80,6 @@ class MinecraftEnv(gymnasium.Env):
         #         self._score += 1
         #         reward = 1  # reward for passed pipe
         #         self._sound_cache = "point"
-
-        # self._loop_iter = (self._loop_iter + 1) % 30
-        # self._ground["x"] = -((-self._ground["x"] + 100) % self._base_shift)
-
-        # rotate the player
-        if self._player_rot > -90:
-            self._player_rot -= PLAYER_VEL_ROT
 
         # player's movement
         # if self._player_vel_y < PLAYER_MAX_VEL_Y and not self._player_flapped:
@@ -114,10 +91,6 @@ class MinecraftEnv(gymnasium.Env):
         #     # more rotation to cover the threshold
         #     # (calculated in visible rotation)
         #     self._player_rot = 45
-
-        self._player_y += min(
-            self._player_vel_y, self._ground["y"] - self._player_y - PLAYER_HEIGHT
-        )
 
         # move pipes to left
         # for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
@@ -169,29 +142,28 @@ class MinecraftEnv(gymnasium.Env):
         super().reset(seed=seed)
 
         # Player's info:
-        self._player_x = int(self._screen_width * 0.2)
-        self._player_y = int((self._screen_height - PLAYER_HEIGHT) / 2)
+        self._player_x = 1
+        self._player_y = 10
         self._player_vel_y = -9  # player"s velocity along Y
         self._player_rot = 45  # player"s rotation
         self._player_idx = 0
         self._loop_iter = 0
         self._score = 0
 
-        # Generate 3 new pipes to add to upper_pipes and lower_pipes lists
         awww_maaaan = self._get_random_creeper()
-
+        self._creepers = [awww_maaaan]
 
         if self.render_mode == "human":
             self.render()
 
-        # obs, _ = self._get_observation()
+        # obs, _ = self._get_observation() # TODO restore
         obs = ()
         info = {"score": self._score}
         return obs, info
 
     def render(self) -> None:
         """Renders the next frame."""
-        if self.render_mode == "rgb_array":
+        if self.render_mode == "rgb_array": # FIXME needed?
             self._draw_surface(show_score=False)
             # Flip the image to retrieve a correct aspect
             return np.transpose(pygame.surfarray.array3d(self._surface), axes=(1, 0, 2))
@@ -216,12 +188,12 @@ class MinecraftEnv(gymnasium.Env):
     def _check_crash(self) -> bool:
         """Returns True if player collides with the ground (base) or a pipe."""
         # if player crashes into ground
-        if self._player_y + PLAYER_HEIGHT >= self._ground["y"] - 1:
-            return True
-        else:
-            player_rect = pygame.Rect(
-                self._player_x, self._player_y, PLAYER_WIDTH, PLAYER_HEIGHT
-            )
+        # if self._player_y + PLAYER_HEIGHT >= self._ground["y"] - 1:
+        #     return True
+        # else:
+        #     player_rect = pygame.Rect(
+        #         self._player_x, self._player_y, PLAYER_WIDTH, PLAYER_HEIGHT
+        #     )
 
             # for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
             #     # upper and lower pipe rects
@@ -342,13 +314,6 @@ class MinecraftEnv(gymnasium.Env):
         #     self._surface.blit(self._images["pipe"][0], (up_pipe["x"], up_pipe["y"]))
         #     self._surface.blit(self._images["pipe"][1], (low_pipe["x"], low_pipe["y"]))
 
-        # Base (ground)
-        # self._surface.blit(self._images["base"], (self._ground["x"], self._ground["y"]))
-
-        # Getting player's rotation
-        visible_rot = PLAYER_ROT_THR
-        if self._player_rot <= PLAYER_ROT_THR:
-            visible_rot = self._player_rot
 
         # Score
         # (must be drawn before the player, so the player overlaps it)
@@ -356,12 +321,9 @@ class MinecraftEnv(gymnasium.Env):
             self._draw_score()
 
         # Player
-        player_surface = pygame.transform.rotate(
-            self._images["player"][self._player_idx],
-            visible_rot,
-        )
+        player_surface = pygame.transform.rotate(self._images["player"][self._player_idx], 0)
         player_surface_rect = player_surface.get_rect(
-            topleft=(self._player_x, self._player_y)
+            topleft=(self._player_x * PLAYER_WIDTH, WINDOW_HEIGHT - PLAYER_HEIGHT)
         )
         self._surface.blit(player_surface, player_surface_rect)
 
