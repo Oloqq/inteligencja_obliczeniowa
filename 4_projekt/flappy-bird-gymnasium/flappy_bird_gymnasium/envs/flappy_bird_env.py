@@ -24,43 +24,12 @@ from flappy_bird_gymnasium.envs.constants import (
     PLAYER_VEL_ROT,
     PLAYER_WIDTH,
 )
-from flappy_bird_gymnasium.envs.lidar import LIDAR
-
 
 class Actions(IntEnum):
-    """Possible actions for the player to take."""
-
     IDLE, FLAP = 0, 1
 
 
 class FlappyBirdEnv(gymnasium.Env):
-    """Flappy Bird Gymnasium environment that yields simple observations.
-
-    The observations yielded by this environment are simple numerical
-    information about the game's state. Specifically, the observations are:
-
-        * Horizontal distance to the next pipe;
-        * Difference between the player's y position and the next hole's y
-          position.
-
-    The reward received by the agent in each step is equal to the score obtained
-    by the agent in that step. A score point is obtained every time the bird
-    passes a pipe.
-
-    Args:
-        screen_size (Tuple[int, int]): The screen's width and height.
-        normalize_obs (bool): If `True`, the observations will be normalized
-            before being returned.
-        pipe_gap (int): Space between a lower and an upper pipe.
-        bird_color (str): Color of the flappy bird. The currently available
-            colors are "yellow", "blue" and "red".
-        pipe_color (str): Color of the pipes. The currently available colors are
-            "green" and "red".
-        background (Optional[str]): Type of background image. The currently
-            available types are "day" and "night". If `None`, no background will
-            be drawn.
-    """
-
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
     def __init__(
@@ -83,24 +52,14 @@ class FlappyBirdEnv(gymnasium.Env):
         self._score_limit = score_limit
 
         self.action_space = gymnasium.spaces.Discrete(2)
-        if use_lidar:
-            if normalize_obs:
-                self.observation_space = gymnasium.spaces.Box(
-                    0.0, 1.0, shape=(180,), dtype=np.float64
-                )
-            else:
-                self.observation_space = gymnasium.spaces.Box(
-                    0.0, np.inf, shape=(180,), dtype=np.float64
-                )
+        if normalize_obs:
+            self.observation_space = gymnasium.spaces.Box(
+                -1.0, 1.0, shape=(12,), dtype=np.float64
+            )
         else:
-            if normalize_obs:
-                self.observation_space = gymnasium.spaces.Box(
-                    -1.0, 1.0, shape=(12,), dtype=np.float64
-                )
-            else:
-                self.observation_space = gymnasium.spaces.Box(
-                    -np.inf, np.inf, shape=(12,), dtype=np.float64
-                )
+            self.observation_space = gymnasium.spaces.Box(
+                -np.inf, np.inf, shape=(12,), dtype=np.float64
+            )
 
         self._screen_width = screen_size[0]
         self._screen_height = screen_size[1]
@@ -118,11 +77,7 @@ class FlappyBirdEnv(gymnasium.Env):
         self._ground = {"x": 0, "y": self._screen_height * 0.79}
         self._base_shift = BASE_WIDTH - BACKGROUND_WIDTH
 
-        if use_lidar:
-            self._lidar = LIDAR(LIDAR_MAX_DISTANCE)
-            self._get_observation = self._get_observation_lidar
-        else:
-            self._get_observation = self._get_observation_features
+        self._get_observation = self._get_observation_features
 
         if render_mode is not None:
             self._fps_clock = pygame.time.Clock()
@@ -137,36 +92,8 @@ class FlappyBirdEnv(gymnasium.Env):
             if audio_on:
                 self._sounds = utils.load_sounds()
 
-    def step(
-        self,
-        action: Union[Actions, int],
+    def step(self, action: Union[Actions, int],
     ) -> Tuple[np.ndarray, float, bool, Dict]:
-        """Given an action, updates the game state.
-
-        Args:
-            action (Union[FlappyBirdLogic.Actions, int]): The action taken by
-                the agent. Zero (0) means "do nothing" and one (1) means "flap".
-
-        Returns:
-            A tuple containing, respectively:
-
-                * an observation (horizontal distance to the next pipe
-                  difference between the player's y position and the next hole's
-                  y position)
-                * a reward (alive = +0.1, pipe = +1.0, dead = -1.0)
-                * a status report (`True` if the game is over and `False`
-                  otherwise)
-                * an info dictionary
-        """
-        """Given an action taken by the player, updates the game's state.
-
-        Args:
-            action (Union[FlappyBirdLogic.Actions, int]): The action taken by
-                the player.
-
-        Returns:
-            `True` if the player is alive and `False` otherwise.
-        """
         terminal = False
         reward = None
 
@@ -307,7 +234,7 @@ class FlappyBirdEnv(gymnasium.Env):
             info,
         )
 
-    def reset(self, seed=None, options=None):
+    def reset(self, seed=None):
         """Resets the environment (starts a new game)."""
         super().reset(seed=seed)
 
