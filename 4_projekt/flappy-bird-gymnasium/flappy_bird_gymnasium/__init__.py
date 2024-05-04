@@ -36,7 +36,7 @@ from flappy_bird_gymnasium.envs.flappy_bird_env import FlappyBirdEnv
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 register(
-    id="FlappyBird-v0",
+    id="Minecraft-v0",
     entry_point="flappy_bird_gymnasium:FlappyBirdEnv",
 )
 

@@ -7,7 +7,7 @@
 This repository contains the implementation of Gymnasium environment for
 the Flappy Bird game. The implementation of the game's logic and graphics was
 based on the [flappy-bird-gym](https://github.com/Talendar/flappy-bird-gym) project, by
-[@Talendar](https://github.com/Talendar). 
+[@Talendar](https://github.com/Talendar).
 
 ## State space
 
@@ -15,7 +15,7 @@ The "FlappyBird-v0" environment, yields simple numerical information about the g
 observations representing the game's screen.
 
 ### `FlappyBird-v0`
-There exist two options for the observations:  
+There exist two options for the observations:
 1. option
 * The LIDAR sensor 180 readings (Paper: [Playing Flappy Bird Based on Motion Recognition Using a Transformer Model and LIDAR Sensor](https://www.mdpi.com/1424-8220/24/6/1905))
 
@@ -48,8 +48,8 @@ There exist two options for the observations:
 <br>
 
 <p align="center">
-  <img align="center" 
-       src="https://github.com/markub3327/flappy-bird-gymnasium/blob/main/imgs/dqn.gif?raw=true" 
+  <img align="center"
+       src="https://github.com/markub3327/flappy-bird-gymnasium/blob/main/imgs/dqn.gif?raw=true"
        width="200"/>
 </p>
 
@@ -58,7 +58,7 @@ There exist two options for the observations:
 To install `flappy-bird-gymnasium`, simply run the following command:
 
     $ pip install flappy-bird-gymnasium
-    
+
 ## Usage
 
 Like with other `gymnasium` environments, it's very easy to use `flappy-bird-gymnasium`.
@@ -68,7 +68,7 @@ Take a look at the sample code below:
 ```python
 import flappy_bird_gymnasium
 import gymnasium
-env = gymnasium.make("FlappyBird-v0", render_mode="human", use_lidar=True)
+env = gymnasium.make("Minecraft-v0", render_mode="human", use_lidar=True)
 
 obs, _ = env.reset()
 while True:
@@ -78,7 +78,7 @@ while True:
 
     # Processing:
     obs, reward, terminated, _, info = env.step(action)
-    
+
     # Checking if the player is still alive
     if terminated:
         break
@@ -91,7 +91,7 @@ env.close()
 To play the game (human mode), run the following command:
 
     $ flappy_bird_gymnasium
-    
+
 To see a random agent playing, add an argument to the command:
 
     $ flappy_bird_gymnasium --mode random
