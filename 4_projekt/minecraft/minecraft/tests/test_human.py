@@ -2,9 +2,7 @@ import gymnasium
 import pygame
 
 def play():
-    env = gymnasium.make(
-        "Minecraft-v0", audio_on=False, render_mode="human", use_lidar=False # FIXME fuck lidar
-    )
+    env = gymnasium.make("Minecraft-v0", audio_on=False, render_mode="human")
 
     steps = 0
     video_buffer = []
@@ -16,10 +14,9 @@ def play():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            if event.type == pygame.KEYDOWN and (
-                event.key == pygame.K_SPACE or event.key == pygame.K_UP
-            ):
-                action = 1
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                    action = 1
 
         obs, _, done, _, info = env.step(action)
         video_buffer.append(obs)

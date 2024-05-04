@@ -11,7 +11,6 @@ from minecraft.envs.constants import (
     BACKGROUND_WIDTH,
     BASE_WIDTH,
     FILL_BACKGROUND_COLOR,
-    LIDAR_MAX_DISTANCE,
     PIPE_HEIGHT,
     PIPE_VEL_X,
     PIPE_WIDTH,
@@ -19,7 +18,6 @@ from minecraft.envs.constants import (
     PLAYER_FLAP_ACC,
     PLAYER_HEIGHT,
     PLAYER_MAX_VEL_Y,
-    PLAYER_PRIVATE_ZONE,
     PLAYER_ROT_THR,
     PLAYER_VEL_ROT,
     PLAYER_WIDTH,
@@ -27,7 +25,6 @@ from minecraft.envs.constants import (
 
 class Actions(IntEnum):
     IDLE, FLAP = 0, 1
-
 
 class MinecraftEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
@@ -37,7 +34,6 @@ class MinecraftEnv(gymnasium.Env):
         screen_size: Tuple[int, int] = (288, 512),
         audio_on: bool = False,
         normalize_obs: bool = True,
-        use_lidar: bool = True,
         pipe_gap: int = 100,
         bird_color: str = "yellow",
         pipe_color: str = "green",
@@ -46,7 +42,7 @@ class MinecraftEnv(gymnasium.Env):
         score_limit: Optional[int] = None,
         debug: bool = False,
     ) -> None:
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        assert render_mode is None or render_mode == "human"
         self.render_mode = render_mode
         self._debug = debug
         self._score_limit = score_limit
@@ -64,15 +60,15 @@ class MinecraftEnv(gymnasium.Env):
         self._screen_width = screen_size[0]
         self._screen_height = screen_size[1]
         self._normalize_obs = normalize_obs
-        self._pipe_gap = pipe_gap
         self._audio_on = audio_on
-        self._use_lidar = use_lidar
         self._sound_cache = None
+        self._bg_type = background
+        self._player_idx_gen = cycle([0, 1, 2, 1]) # FIXME ???
+
         self._player_flapped = False
-        self._player_idx_gen = cycle([0, 1, 2, 1])
+        self._pipe_gap = pipe_gap
         self._bird_color = bird_color
         self._pipe_color = pipe_color
-        self._bg_type = background
 
         self._ground = {"x": 0, "y": self._screen_height * 0.79}
         self._base_shift = BASE_WIDTH - BACKGROUND_WIDTH
@@ -162,44 +158,6 @@ class MinecraftEnv(gymnasium.Env):
             else:
                 reward = 0.1  # reward for staying alive
 
-        # check
-        if self._debug and self._use_lidar:
-            # sort pipes by the distance between pipe and agent
-            up_pipe = sorted(
-                self._upper_pipes,
-                key=lambda x: np.sqrt(
-                    (self._player_x - x["x"]) ** 2
-                    + (self._player_y - (x["y"] + PIPE_HEIGHT)) ** 2
-                ),
-            )[0]
-            # find ray closest to the obstacle
-            min_index = np.argmin(obs)
-            min_value = obs[min_index] * LIDAR_MAX_DISTANCE
-            # mean approach to the obstacle
-            if "pipe_mean_value" in self._statistics:
-                self._statistics["pipe_mean_value"] = self._statistics[
-                    "pipe_mean_value"
-                ] * 0.99 + min_value * (1 - 0.99)
-            else:
-                self._statistics["pipe_mean_value"] = min_value
-
-            # Nearest to the pipe
-            if "pipe_min_value" in self._statistics:
-                if min_value < self._statistics["pipe_min_value"]:
-                    self._statistics["pipe_min_value"] = min_value
-                    self._statistics["pipe_min_index"] = min_index
-            else:
-                self._statistics["pipe_min_value"] = min_value
-                self._statistics["pipe_min_index"] = min_index
-
-            # Nearest to the ground
-            diff = np.abs(self._player_y - self._ground["y"])
-            if "ground_min_value" in self._statistics:
-                if diff < self._statistics["ground_min_value"]:
-                    self._statistics["ground_min_value"] = diff
-            else:
-                self._statistics["ground_min_value"] = diff
-
         # agent touch the top of the screen as punishment
         if self._player_y < 0:
             reward = -0.5
@@ -210,20 +168,6 @@ class MinecraftEnv(gymnasium.Env):
             reward = -1  # reward for dying
             terminal = True
             self._player_vel_y = 0
-            if self._debug and self._use_lidar:
-                if ((self._player_x + PLAYER_WIDTH) - up_pipe["x"]) > (0 + 5) and (
-                    self._player_x - up_pipe["x"]
-                ) < PIPE_WIDTH:
-                    print("BETWEEN PIPES")
-                elif ((self._player_x + PLAYER_WIDTH) - up_pipe["x"]) < (0 + 5):
-                    print("IN FRONT OF")
-                print(
-                    f"obs: [{self._statistics['pipe_min_index']},"
-                    f"{self._statistics['pipe_min_value']},"
-                    f"{self._statistics['pipe_mean_value']}],"
-                    f"Ground: {self._statistics['ground_min_value']}"
-                )
-
         info = {"score": self._score}
 
         return (
@@ -234,7 +178,8 @@ class MinecraftEnv(gymnasium.Env):
             info,
         )
 
-    def reset(self, seed=None):
+    # Options are declared jsut to supress a warning
+    def reset(self, seed=None, options=None):
         """Resets the environment (starts a new game)."""
         super().reset(seed=seed)
 
@@ -246,9 +191,6 @@ class MinecraftEnv(gymnasium.Env):
         self._player_idx = 0
         self._loop_iter = 0
         self._score = 0
-
-        if self._debug and self._use_lidar:
-            self._statistics = {}
 
         # Generate 3 new pipes to add to upper_pipes and lower_pipes lists
         new_pipe1 = self._get_random_pipe()
@@ -291,11 +233,11 @@ class MinecraftEnv(gymnasium.Env):
     def render(self) -> None:
         """Renders the next frame."""
         if self.render_mode == "rgb_array":
-            self._draw_surface(show_score=False, show_rays=False)
+            self._draw_surface(show_score=False)
             # Flip the image to retrieve a correct aspect
             return np.transpose(pygame.surfarray.array3d(self._surface), axes=(1, 0, 2))
         else:
-            self._draw_surface(show_score=True, show_rays=self._use_lidar)
+            self._draw_surface(show_score=True)
             if self._display is None:
                 self._make_display()
 
@@ -327,8 +269,6 @@ class MinecraftEnv(gymnasium.Env):
         """Returns True if player collides with the ground (base) or a pipe."""
         # if player crashes into ground
         if self._player_y + PLAYER_HEIGHT >= self._ground["y"] - 1:
-            if self._debug and self._use_lidar:
-                print("CRASH TO THE GROUND")
             return True
         else:
             player_rect = pygame.Rect(
@@ -348,26 +288,8 @@ class MinecraftEnv(gymnasium.Env):
                 up_collide = player_rect.colliderect(up_pipe_rect)
                 low_collide = player_rect.colliderect(low_pipe_rect)
 
-                if self._debug and self._use_lidar:
-                    if up_collide:
-                        print("CRASH TO UPPER PIPE")
-                        print(
-                            f"up_pipe: {[up_pipe['x'], up_pipe['y']+PIPE_HEIGHT]},"
-                            f"low_pipe: {low_pipe},"
-                            f"player: [{self._player_x}, {self._player_y}]"
-                        )
-                        return True
-                    if low_collide:
-                        print("CRASH TO LOWER PIPE")
-                        print(
-                            f"up_pipe: {[up_pipe['x'], up_pipe['y']+PIPE_HEIGHT]},"
-                            f"low_pipe: {low_pipe},"
-                            f"player: [{self._player_x}, {self._player_y}]"
-                        )
-                        return True
-                else:
-                    if up_collide or low_collide:
-                        return True
+                if up_collide or low_collide:
+                    return True
 
         return False
 
@@ -420,27 +342,6 @@ class MinecraftEnv(gymnasium.Env):
             None,
         )
 
-    def _get_observation_lidar(self) -> np.ndarray:
-        # obstacles
-        distances = self._lidar.scan(
-            self._player_x,
-            self._player_y,
-            self._player_rot,
-            self._upper_pipes,
-            self._lower_pipes,
-            self._ground,
-        )
-
-        if np.any(distances < PLAYER_PRIVATE_ZONE):
-            reward = -0.5
-        else:
-            reward = None
-
-        if self._normalize_obs:
-            distances = distances / LIDAR_MAX_DISTANCE
-
-        return distances, reward
-
     def _make_display(self) -> None:
         """Initializes the pygame's display.
 
@@ -476,7 +377,7 @@ class MinecraftEnv(gymnasium.Env):
             )
             x_offset += self._images["numbers"][digit].get_width()
 
-    def _draw_surface(self, show_score: bool = True, show_rays: bool = True) -> None:
+    def _draw_surface(self, show_score: bool = True) -> None:
         """Re-draws the renderer's surface.
 
         This method updates the renderer's surface by re-drawing it according to
@@ -503,73 +404,6 @@ class MinecraftEnv(gymnasium.Env):
         visible_rot = PLAYER_ROT_THR
         if self._player_rot <= PLAYER_ROT_THR:
             visible_rot = self._player_rot
-
-        # LIDAR
-        if show_rays:
-            self._lidar.draw(self._surface, self._player_x, self._player_y)
-
-            # Draw private zone
-            target_rect = pygame.Rect(
-                self._player_x - PLAYER_PRIVATE_ZONE,
-                self._player_y - PLAYER_PRIVATE_ZONE,
-                PLAYER_PRIVATE_ZONE * 2 + PLAYER_WIDTH,
-                PLAYER_PRIVATE_ZONE * 2 + PLAYER_HEIGHT,
-            )
-            shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
-            pygame.draw.circle(
-                shape_surf,
-                "blue",
-                (
-                    PLAYER_PRIVATE_ZONE + PLAYER_WIDTH,
-                    PLAYER_PRIVATE_ZONE + (PLAYER_HEIGHT / 2),
-                ),
-                PLAYER_PRIVATE_ZONE,
-                1,
-                draw_top_left=False,
-                draw_top_right=True,
-                draw_bottom_left=False,
-                draw_bottom_right=True,
-            )
-            pygame.draw.circle(
-                shape_surf,
-                "blue",
-                (PLAYER_PRIVATE_ZONE, PLAYER_PRIVATE_ZONE + (PLAYER_HEIGHT / 2)),
-                PLAYER_PRIVATE_ZONE,
-                1,
-                draw_top_left=True,
-                draw_top_right=False,
-                draw_bottom_left=True,
-                draw_bottom_right=False,
-            )
-            pygame.draw.circle(
-                shape_surf,
-                "blue",
-                (PLAYER_PRIVATE_ZONE + (PLAYER_WIDTH / 2), PLAYER_PRIVATE_ZONE),
-                PLAYER_PRIVATE_ZONE,
-                1,
-                draw_top_left=True,
-                draw_top_right=True,
-                draw_bottom_left=False,
-                draw_bottom_right=False,
-            )
-            pygame.draw.circle(
-                shape_surf,
-                "blue",
-                (
-                    PLAYER_PRIVATE_ZONE + (PLAYER_WIDTH / 2),
-                    PLAYER_PRIVATE_ZONE + PLAYER_HEIGHT,
-                ),
-                PLAYER_PRIVATE_ZONE,
-                1,
-                draw_top_left=False,
-                draw_top_right=False,
-                draw_bottom_left=True,
-                draw_bottom_right=True,
-            )
-            rotated_surf = pygame.transform.rotate(shape_surf, visible_rot)
-            self._surface.blit(
-                rotated_surf, rotated_surf.get_rect(center=target_rect.center)
-            )
 
         # Score
         # (must be drawn before the player, so the player overlaps it)
