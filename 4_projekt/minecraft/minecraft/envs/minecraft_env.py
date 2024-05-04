@@ -86,7 +86,17 @@ class MinecraftEnv(gymnasium.Env):
 
         aww_meeeeen = []
         for col, row in self._creepers:
-            aww_meeeeen.append((col, row + 1))
+            new_row = row + 1
+            if new_row >= 3:
+                if col == self._player_x:
+                    print("ooohh")
+                    reward -= 1
+                else:
+                    self._score += 1
+                    reward += 1
+                aww_meeeeen.append((self._get_random_creeper(), 0))
+            else:
+                aww_meeeeen.append((col, new_row))
         self._creepers = aww_meeeeen
 
         if self.render_mode == "human":
