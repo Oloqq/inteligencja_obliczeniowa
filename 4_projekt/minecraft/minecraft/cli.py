@@ -1,6 +1,6 @@
 import argparse
-from flappy_bird_gymnasium.tests.test_human import play as human_agent_env
-from flappy_bird_gymnasium.tests.test_random import play as random_agent_env
+from minecraft.tests.test_human import play as human_agent_env
+from minecraft.tests.test_random import play as random_agent_env
 
 
 def _get_args():

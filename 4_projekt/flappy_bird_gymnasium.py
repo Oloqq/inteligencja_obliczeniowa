@@ -37,8 +37,8 @@ import gymnasium
 import numpy as np
 import pygame
 
-from flappy_bird_gymnasium.envs import utils
-from flappy_bird_gymnasium.envs.constants import (
+from minecraft.envs import utils
+from minecraft.envs.constants import (
     BACKGROUND_WIDTH,
     BASE_WIDTH,
     FILL_BACKGROUND_COLOR,
@@ -55,7 +55,7 @@ from flappy_bird_gymnasium.envs.constants import (
     PLAYER_VEL_ROT,
     PLAYER_WIDTH,
 )
-from flappy_bird_gymnasium.envs.lidar import LIDAR
+from minecraft.envs.lidar import LIDAR
 
 
 class Actions(IntEnum):

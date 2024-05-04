@@ -29,7 +29,7 @@ random agent.
 import gymnasium
 import numpy as np
 
-import flappy_bird_gymnasium
+import minecraft
 
 
 def play(audio_on=True, render_mode="human", use_lidar=False):

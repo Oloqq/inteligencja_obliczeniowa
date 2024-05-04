@@ -6,8 +6,8 @@ import gymnasium
 import numpy as np
 import pygame
 
-from flappy_bird_gymnasium.envs import utils
-from flappy_bird_gymnasium.envs.constants import (
+from minecraft.envs import utils
+from minecraft.envs.constants import (
     BACKGROUND_WIDTH,
     BASE_WIDTH,
     FILL_BACKGROUND_COLOR,
