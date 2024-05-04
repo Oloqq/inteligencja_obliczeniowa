@@ -13,7 +13,7 @@ from minecraft.envs.constants import (
 )
 
 class Actions(IntEnum):
-    IDLE, FLAP = 0, 1
+    IDLE, LEFT, RIGHT = 0, 1, 2
 
 class MinecraftEnv(gymnasium.Env):
     # Required by parent class
@@ -69,8 +69,10 @@ class MinecraftEnv(gymnasium.Env):
         reward = None
 
         self._sound_cache = None
-        if action == Actions.FLAP:
+        if action == Actions.RIGHT and self._player_x < 2:
             self._player_x += 1
+        if action == Actions.LEFT and self._player_x > 0:
+            self._player_x -= 1
 
         # check for score
         # player_mid_pos = self._player_x + PLAYER_WIDTH / 2
