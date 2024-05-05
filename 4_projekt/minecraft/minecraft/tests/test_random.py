@@ -28,18 +28,21 @@ random agent.
 
 import gymnasium
 import numpy as np
+import time
 
 import minecraft
 
 
-def play(audio_on=True, render_mode="human", use_lidar=False):
+def play(audio_on=True, render_mode="human"):
     env = gymnasium.make(
-        "Minecraft-v0", audio_on=audio_on, render_mode=render_mode, use_lidar=use_lidar
+        "Minecraft-v0", audio_on=audio_on, render_mode=render_mode
     )
     obs = env.reset()
     while True:
         # Getting random action:
-        action = env.action_space.sample()
+        action = np.random.randint(0, 3)
+
+        time.sleep(0.3)
 
         # Processing:
         obs, _, done, _, info = env.step(action)
