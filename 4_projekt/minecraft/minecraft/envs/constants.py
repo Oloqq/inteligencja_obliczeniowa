@@ -6,6 +6,3 @@ PLAYER_HEIGHT = 105
 
 CREEPER_WIDTH = 96
 CREEPER_HEIGHT = 124
-
-#: Player's rotation threshold.
-PLAYER_ROT_THR = 20

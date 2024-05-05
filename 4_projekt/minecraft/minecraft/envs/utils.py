@@ -94,12 +94,6 @@ def load_images(
             [_load_sprite(f"{n}.png", convert=convert, alpha=True) for n in range(10)]
         )
 
-        # Game over sprite:
-        images["gameover"] = _load_sprite("gameover.png", convert=convert, alpha=True)
-
-        # Welcome screen message sprite: FIXME unused
-        images["message"] = _load_sprite("message.png", convert=convert, alpha=True)
-
         # Background sprite:
         images["background"] = _load_sprite(f"cave.png", convert=convert, alpha=False)
 

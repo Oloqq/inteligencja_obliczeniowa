@@ -75,15 +75,6 @@ class MinecraftEnv(gymnasium.Env):
         if action == Actions.LEFT and self._player_x > 0:
             self._player_x -= 1
 
-        # check for score
-        # player_mid_pos = self._player_x + PLAYER_WIDTH / 2
-        # for pipe in self._upper_pipes:
-        #     pipe_mid_pos = pipe["x"] + PIPE_WIDTH / 2
-        #     if pipe_mid_pos <= player_mid_pos < pipe_mid_pos + 4:
-        #         self._score += 1
-        #         reward = 1  # reward for passed pipe
-        #         self._sound_cache = "point"
-
         aww_meeeeen = []
         for col, row in self._creepers:
             new_row = row + 1
@@ -176,29 +167,10 @@ class MinecraftEnv(gymnasium.Env):
 
     def _check_crash(self) -> bool:
         """Returns True if player collides with the ground (base) or a pipe."""
-        # if player crashes into ground
-        # if self._player_y + PLAYER_HEIGHT >= self._ground["y"] - 1:
+        # crep = self._creepers[0]
+        # aww, men = crep
+        # if self._player_x == aww and men >= 2:
         #     return True
-        # else:
-        #     player_rect = pygame.Rect(
-        #         self._player_x, self._player_y, PLAYER_WIDTH, PLAYER_HEIGHT
-        #     )
-
-            # for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
-            #     # upper and lower pipe rects
-            #     up_pipe_rect = pygame.Rect(
-            #         up_pipe["x"], up_pipe["y"], PIPE_WIDTH, PIPE_HEIGHT
-            #     )
-            #     low_pipe_rect = pygame.Rect(
-            #         low_pipe["x"], low_pipe["y"], PIPE_WIDTH, PIPE_HEIGHT
-            #     )
-
-            #     # check collision
-            #     up_collide = player_rect.colliderect(up_pipe_rect)
-            #     low_collide = player_rect.colliderect(low_pipe_rect)
-
-            #     if up_collide or low_collide:
-            #         return True
 
         return False
 

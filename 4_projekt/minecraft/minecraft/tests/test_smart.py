@@ -26,7 +26,7 @@ def play(audio_on=True, render_mode="human"):
         # Processing:
         obs, _, done, _, info = env.step(action)
 
-        print(f"Obs: {obs}\n" f"Score: {info['score']}\n")
+        # print(f"Obs: {obs}\n" f"Score: {info['score']}\n")
 
         if done:
             break
