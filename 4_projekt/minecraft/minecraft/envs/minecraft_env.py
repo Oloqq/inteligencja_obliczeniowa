@@ -54,7 +54,7 @@ class MinecraftEnv(gymnasium.Env):
 
         self._creepers = []
 
-        # self._get_observation = self._get_observation_features # TODO restore
+        self._get_observation = self._get_observation_features
 
         if render_mode is not None:
             self._fps_clock = pygame.time.Clock()
@@ -90,7 +90,8 @@ class MinecraftEnv(gymnasium.Env):
             if new_row >= 3:
                 if col == self._player_x:
                     print("ooohh")
-                    reward -= 1
+                    self._score = max(self._score - 5, 0)
+                    reward -= 5
                 else:
                     self._score += 1
                     reward += 1
@@ -102,13 +103,12 @@ class MinecraftEnv(gymnasium.Env):
         if self.render_mode == "human":
             self.render()
 
-        obs = () # FIXME
-        # obs, reward_private_zone = self._get_observation()
-        # if reward is None:
-        #     if reward_private_zone is not None:
-        #         reward = reward_private_zone
-        #     else:
-        #         reward = 0.1  # reward for staying alive
+        obs, reward_private_zone = self._get_observation()
+        if reward is None:
+            if reward_private_zone is not None:
+                reward = reward_private_zone
+            else:
+                reward = 0.1
 
         # FIXME check for crash
         if self._check_crash():
@@ -146,8 +146,7 @@ class MinecraftEnv(gymnasium.Env):
         if self.render_mode == "human":
             self.render()
 
-        # obs, _ = self._get_observation() # TODO restore
-        obs = ()
+        obs, _ = self._get_observation()
         info = {"score": self._score}
         return obs, info
 
@@ -204,49 +203,11 @@ class MinecraftEnv(gymnasium.Env):
         return False
 
     def _get_observation_features(self) -> np.ndarray:
-        pipes = []
-        for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
-            # the pipe is behind the screen?
-            if low_pipe["x"] > self._screen_width:
-                pipes.append((self._screen_width, 0, self._screen_height))
-            else:
-                pipes.append(
-                    (low_pipe["x"], (up_pipe["y"] + PIPE_HEIGHT), low_pipe["y"])
-                )
-
-        pipes = sorted(pipes, key=lambda x: x[0])
-        pos_y = self._player_y
-        vel_y = self._player_vel_y
-        rot = self._player_rot
-
-        if self._normalize_obs:
-            pipes = [
-                (
-                    h / self._screen_width,
-                    v1 / self._screen_height,
-                    v2 / self._screen_height,
-                )
-                for h, v1, v2 in pipes
-            ]
-            pos_y /= self._screen_height
-            vel_y /= PLAYER_MAX_VEL_Y
-            rot /= 90
-
         return (
             np.array(
                 [
-                    pipes[0][0],  # the last pipe's horizontal position
-                    pipes[0][1],  # the last top pipe's vertical position
-                    pipes[0][2],  # the last bottom pipe's vertical position
-                    pipes[1][0],  # the next pipe's horizontal position
-                    pipes[1][1],  # the next top pipe's vertical position
-                    pipes[1][2],  # the next bottom pipe's vertical position
-                    pipes[2][0],  # the next next pipe's horizontal position
-                    pipes[2][1],  # the next next top pipe's vertical position
-                    pipes[2][2],  # the next next bottom pipe's vertical position
-                    pos_y,  # player's vertical position
-                    vel_y,  # player's vertical velocity
-                    rot,  # player's rotation
+                    self._player_x,
+                    self._creepers[0][0] # creeper x
                 ]
             ),
             None,
