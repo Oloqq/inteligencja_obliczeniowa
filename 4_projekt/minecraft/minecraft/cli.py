@@ -29,7 +29,6 @@ def main():
     if args.mode == "human":
         human_agent_env()
     elif args.mode == "random":
-        raise NotImplementedError
         random_agent_env(
             audio_on=(not args.quiet), render_mode="human" if not args.quiet else None
         )
