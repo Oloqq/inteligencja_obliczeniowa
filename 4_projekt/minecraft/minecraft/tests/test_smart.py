@@ -9,10 +9,17 @@ def play(audio_on=True, render_mode="human"):
     env = gymnasium.make(
         "Minecraft-v0", audio_on=audio_on, render_mode=render_mode
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     while True:
-        # Getting random action:
-        action = np.random.randint(0, 3)
+        action = 0
+        steve, creeper = obs
+        if steve == creeper:
+            if steve == 0:
+                action = 2
+            elif steve == 1:
+                action = np.random.randint(1, 3)
+            else:
+                action = 1
 
         time.sleep(0.3)
 
