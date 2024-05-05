@@ -1,10 +1,3 @@
-1.  Napisz własne dowolne środowisko Gymnasium.
-2.  Napisz program rozwiązujący problem w utworzonym środowisku.
-3.  Agentowi udaje się ukończyć grę / rozwiązać problem.
-4.  Napisz sprawozdanie (około 2-3 strony A4), w którym opiszesz swoją implementację
-środowiska i problemu, wykorzystany algorytm oraz przeprowadzone eksperymenty
-z AI
-
 # Środowisko
 W naszym środowisku dzielny Ślązak musi unikać spadających mu na głowę goroli.
 
@@ -22,4 +15,5 @@ Implementując nasze środowisko wzorowaliśmy się na repozytorium `https://git
 
 Gracz zdobywa punkt za każdego przeciwnika który rozbije się o podłogę, oraz traci punkty za każdego który go trafi. Gra kończy się po określonej z góry ilości ruchów.
 
-# Agent
+# Program rozwiązujący problem w utworzonym środowisku
+
