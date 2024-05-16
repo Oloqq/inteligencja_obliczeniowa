@@ -6,9 +6,11 @@ env = gym.make("LunarLander-v2",
     enable_wind = False,
     wind_power = 15.0,
     turbulence_power = 1.5,
+    render_mode="human"
 )
 
 env.reset()
-for _ in range(1000):
+for i in range(1000):
+    print(i)
     env.step(env.action_space.sample())
     env.render()
