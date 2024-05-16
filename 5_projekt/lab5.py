@@ -8,3 +8,7 @@ env = gym.make("LunarLander-v2",
     turbulence_power = 1.5,
 )
 
+env.reset()
+for _ in range(1000):
+    env.step(env.action_space.sample())
+    env.render()
