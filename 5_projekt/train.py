@@ -12,16 +12,16 @@ env = gym.make("LunarLander-v2",
 )
 
 model = SAC('MlpPolicy', env, verbose=1)
-model.learn(total_timesteps=100)
+model.learn(total_timesteps=10000)
 model.save("sac_lunarlander_continuous")
 
-obs = env.reset()
-for i in range(1000):
-    print(i)
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
-    env.render()
-    if done:
-        obs = env.reset()
+# obs = env.reset()
+# for i in range(1000):
+#     print(i)
+#     action, _states = model.predict(obs, deterministic=True)
+#     obs, reward, done, info = env.step(action)
+#     env.render()
+#     if done:
+#         obs = env.reset()
 
 env.close()

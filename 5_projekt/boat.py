@@ -1,6 +1,5 @@
 import gymnasium as gym
 from stable_baselines3 import SAC
-from stable_baselines3.common.env_util import make_vec_env
 
 env = gym.make("LunarLander-v2",
     continuous = True,
@@ -8,18 +7,18 @@ env = gym.make("LunarLander-v2",
     enable_wind = False,
     wind_power = 15.0,
     turbulence_power = 1.5,
-    # render_mode="human"
+    render_mode="human"
 )
 
-model = SAC('MlpPolicy', env, verbose=1)
-model.learn(total_timesteps=100)
-model.save("sac_lunarlander_continuous")
+# Załadowanie wcześniej zapisanego modelu
+model = SAC.load("sac_lunarlander_continuous", env=env)
 
-obs = env.reset()
+# Testowanie załadowanego modelu
+obs, info = env.reset()
 for i in range(1000):
     print(i)
     action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
+    obs, reward, done, info, idk = env.step(action)
     env.render()
     if done:
         obs = env.reset()
