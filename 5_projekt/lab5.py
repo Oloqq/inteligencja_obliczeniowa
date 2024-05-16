@@ -11,6 +11,7 @@ env = gym.make("LunarLander-v2",
 
 env.reset()
 for i in range(1000):
-    print(i)
-    env.step(env.action_space.sample())
+    # print(i)
+    next_state, reward, done, _, _  = env.step(env.action_space.sample())
+    print(reward)
     env.render()
