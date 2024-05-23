@@ -3,40 +3,25 @@ from stable_baselines3 import SAC
 import numpy as np
 import matplotlib.pyplot as plt
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
+from stable_baselines3.common.monitor import Monitor
 
 
-# Funkcja do trenowania modelu i zwracania nagród
 def train_and_evaluate(env_name, hyperparams, num_timesteps=50000, num_runs=10):
     all_rewards = []
 
     for run in range(num_runs):
         env = gym.make(env_name, render_mode="rgb_array")
-        # env = gym.make(
-        #     "LunarLander-v2",
-        #     continuous=True,
-        #     gravity=-10.0,
-        #     enable_wind=False,
-        #     wind_power=15.0,
-        #     turbulence_power=1.5,
-        #     # render_mode="human"
-        # )
         env = DummyVecEnv([lambda: env])
         env = VecMonitor(env)
         model = SAC("MlpPolicy", env, **hyperparams, verbose=0)
-        model.learn(total_timesteps=num_timesteps)
 
-        obs = env.reset()
-        rewards = []
-        for _ in range(num_timesteps):
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, done, info = env.step(action)
-            # print(rewards)
-            rewards.append(np.mean(reward))
-            # Upewnij się, że dodajesz jednowymiarowe wartości
-            if done.any():
-                obs = env.reset()
+        run_rewards = []
+        # model.learn(total_timesteps=num_timesteps)
+        for timestep in range(num_timesteps / 10):
+            model.learn(total_timesteps=10)
+            run_rewards.append(model.env.episode_returns)
 
-        all_rewards.append(rewards)
+        all_rewards.append(run_rewards)
         env.close()
 
     all_rewards = np.array(all_rewards).clip(min=-10, max=10)
